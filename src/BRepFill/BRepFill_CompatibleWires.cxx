@@ -128,7 +128,7 @@ static void AddNewEdge(const TopoDS_Shape& theEdge,
     const TopTools_SequenceOfShape& NewEdges = theEdgeNewEdges(theEdge);
     for (Standard_Integer i = 1; i <= NewEdges.Length(); i++)
     {
-      TopoDS_Shape anEdge = NewEdges(i);
+      const TopoDS_Shape& anEdge = NewEdges(i);
       AddNewEdge(anEdge, theEdgeNewEdges, ListNewEdges);
     }
   }
@@ -140,10 +140,9 @@ static void SeqOfVertices (const TopoDS_Wire&   W,
 			   TopTools_SequenceOfShape& S)
 {
   S.Clear();
-  Standard_Integer jj, cpt = 0;
+  Standard_Integer jj;
   TopExp_Explorer PE;
   for (PE.Init(W,TopAbs_VERTEX); PE.More(); PE.Next()) {
-    cpt++;
     Standard_Boolean trouve=Standard_False;
     for (jj=1;jj<=S.Length() && (!trouve);jj++) {
       if (S.Value(jj).IsSame(PE.Current())) trouve = Standard_True; 
@@ -819,7 +818,6 @@ void BRepFill_CompatibleWires::Perform (const Standard_Boolean WithRotation)
   report = (nbmax != nbmin || contS >= GeomAbs_C1 );
   
   // initialization of the map
-  Standard_Integer nbE = 0;
   TopTools_ListOfShape Empty;
   for (i=1; i<=nbSects; i++) {
     TopoDS_Wire W = TopoDS::Wire(myWork(i));
@@ -827,7 +825,6 @@ void BRepFill_CompatibleWires::Perform (const Standard_Boolean WithRotation)
       TopoDS_Edge E = TopoDS::Edge(anExp.Current());
       myMap.Bind(E,Empty);
       myMap(E).Append(E);
-      nbE++;
     }
   } 
   
@@ -1309,7 +1306,7 @@ void BRepFill_CompatibleWires::
   TopTools_DataMapIteratorOfDataMapOfShapeListOfShape itmap(myMap);
   for (; itmap.More(); itmap.Next())
   {
-    TopoDS_Shape anEdge = itmap.Key();
+    const TopoDS_Shape& anEdge = itmap.Key();
     TopTools_ListOfShape ListOfNewEdges;
 
     //for each edge of <myMap> find all newest edges
@@ -1474,15 +1471,11 @@ void BRepFill_CompatibleWires::SameNumberByACR(const  Standard_Boolean  report)
 	    TopTools_DataMapIteratorOfDataMapOfShapeListOfShape itmap;
 	    //TopTools_ListIteratorOfListOfShape itlist;
 	    TopoDS_Edge Ancestor;
-	    Standard_Integer nbedge, nblist=0;
 	    Standard_Boolean found = Standard_False;
 
 	    for (itmap.Initialize(myMap);itmap.More()&&(!found);itmap.Next()) {
-	      nblist++;
 	      TopTools_ListIteratorOfListOfShape itlist(itmap.Value());
-	      nbedge = 0;
 	      while (itlist.More()&&(!found)) {
-		nbedge++;
 		TopoDS_Edge ECur = TopoDS::Edge(itlist.Value());
 		    
 		if (Ecur.IsSame(ECur)) {
