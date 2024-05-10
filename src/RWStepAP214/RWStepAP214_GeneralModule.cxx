@@ -98,6 +98,8 @@
 #include <RWStepBasic_RWExternalIdentificationAssignment.hxx>
 #include <RWStepBasic_RWExternallyDefinedItem.hxx>
 #include <RWStepBasic_RWGeneralProperty.hxx>
+#include <RWStepBasic_RWGeneralPropertyAssociation.hxx>
+#include <RWStepBasic_RWGeneralPropertyRelationship.hxx>
 #include <RWStepBasic_RWGroupRelationship.hxx>
 #include <RWStepBasic_RWIdentificationAssignment.hxx>
 #include <RWStepBasic_RWIdentificationRole.hxx>
@@ -325,6 +327,7 @@
 #include <RWStepRepr_RWMaterialDesignation.hxx>
 #include <RWStepRepr_RWMaterialProperty.hxx>
 #include <RWStepRepr_RWMaterialPropertyRepresentation.hxx>
+#include <RWStepRepr_RWMechanicalDesignAndDraughtingRelationship.hxx>
 #include <RWStepRepr_RWMeasureRepresentationItem.hxx>
 #include <RWStepRepr_RWProductConcept.hxx>
 #include <RWStepRepr_RWProductDefinitionShape.hxx>
@@ -570,6 +573,8 @@
 #include <StepBasic_ExternalIdentificationAssignment.hxx>
 #include <StepBasic_ExternalSource.hxx>
 #include <StepBasic_GeneralProperty.hxx>
+#include <StepBasic_GeneralPropertyAssociation.hxx>
+#include <StepBasic_GeneralPropertyRelationship.hxx>
 #include <StepBasic_Group.hxx>
 #include <StepBasic_GroupRelationship.hxx>
 #include <StepBasic_IdentificationAssignment.hxx>
@@ -785,6 +790,7 @@
 #include <StepRepr_ConfigurationEffectivity.hxx>
 #include <StepRepr_ConstructiveGeometryRepresentation.hxx>
 #include <StepRepr_ConstructiveGeometryRepresentationRelationship.hxx>
+#include <StepRepr_MechanicalDesignAndDraughtingRelationship.hxx>
 #include <StepRepr_DataEnvironment.hxx>
 #include <StepRepr_DescriptiveRepresentationItem.hxx>
 #include <StepRepr_Extension.hxx>
@@ -1188,7 +1194,9 @@ IMPLEMENT_STANDARD_RTTIEXT(RWStepAP214_GeneralModule,StepData_GeneralModule)
 #include <StepDimTol_GeoTolAndGeoTolWthDatRefAndUneqDisGeoTol.hxx>
 #include <StepRepr_CompGroupShAspAndCompShAspAndDatumFeatAndShAsp.hxx>
 #include <StepRepr_CompShAspAndDatumFeatAndShAsp.hxx>
+#include <StepRepr_BooleanRepresentationItem.hxx>
 #include <StepRepr_IntegerRepresentationItem.hxx>
+#include <StepRepr_RealRepresentationItem.hxx>
 #include <StepRepr_ValueRepresentationItem.hxx>
 #include <StepAP242_DraughtingModelItemAssociation.hxx>
 #include <StepDimTol_GeoTolAndGeoTolWthDatRefAndGeoTolWthMaxTol.hxx>
@@ -5876,6 +5884,27 @@ void RWStepAP214_GeneralModule::FillSharedCase(const Standard_Integer CN,
     aTool.Share(anEnt, iter);
   }
   break;
+  case 820:
+  {
+    DeclareAndCast(StepBasic_GeneralPropertyAssociation, anEnt, ent);
+    RWStepBasic_RWGeneralPropertyAssociation aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 821:
+  {
+    DeclareAndCast(StepBasic_GeneralPropertyRelationship, anEnt, ent);
+    RWStepBasic_RWGeneralPropertyRelationship aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 824:
+  {
+    DeclareAndCast(StepRepr_MechanicalDesignAndDraughtingRelationship, anEnt, ent);
+    RWStepRepr_RWMechanicalDesignAndDraughtingRelationship aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
   default : break;
   }
 }
@@ -8184,6 +8213,21 @@ Standard_Boolean RWStepAP214_GeneralModule::NewVoid
      break;
    case 819:
      ent = new StepVisual_TriangulatedSurfaceSet;
+     break;
+   case 820:
+     ent = new StepBasic_GeneralPropertyAssociation;
+     break;
+   case 821:
+     ent = new StepBasic_GeneralPropertyRelationship;
+     break;
+   case 822:
+     ent = new StepRepr_BooleanRepresentationItem;
+     break;
+   case 823:
+     ent = new StepRepr_RealRepresentationItem;
+     break;
+   case 824:
+     ent = new StepRepr_MechanicalDesignAndDraughtingRelationship;
      break;
 
   default: 

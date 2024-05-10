@@ -48,6 +48,7 @@ class StepShape_FaceSurface;
 class TopoDS_Shell;
 class TopoDS_Compound;
 class StepRepr_ConstructiveGeometryRepresentationRelationship;
+class StepRepr_MechanicalDesignAndDraughtingRelationship;
 class StepData_StepModel;
 
 
@@ -191,6 +192,12 @@ protected:
                                                    const Handle(Transfer_TransientProcess)& theTP,
                                                    const StepData_Factors& theLocalFactors = StepData_Factors());
 
+  //! Transfers MechanicalDesignAndDraughtingRelationship entity
+  Handle(TransferBRep_ShapeBinder) TransferEntity(const Handle(StepRepr_MechanicalDesignAndDraughtingRelationship)& theMDADR,
+                                                  const Handle(Transfer_TransientProcess)& theTP,
+                                                  const StepData_Factors& theLocalFactors,
+                                                  const Message_ProgressRange& theProgress);
+
   //! Translates file by old way when CDSR are roots . Acts only if "read.step.product_mode" is equal Off.
   Standard_EXPORT Handle(TransferBRep_ShapeBinder) OldWay
                    (const Handle(Standard_Transient)& start,
@@ -205,6 +212,14 @@ private:
   Standard_EXPORT TopoDS_Shell closeIDEASShell (const TopoDS_Shell& shell, const TopTools_ListOfShape& closingShells);
 
   Standard_EXPORT void computeIDEASClosings (const TopoDS_Compound& comp, TopTools_IndexedDataMapOfShapeListOfShape& shellClosingMap);
+
+  Standard_EXPORT TopoDS_Shape TransferRelatedSRR(const Handle(Transfer_TransientProcess)& theTP,
+                                                  const Handle(StepShape_ShapeRepresentation)& theRep,
+                                                  const Standard_Boolean theUseTrsf,
+                                                  const Standard_Integer theReadConstructiveGeomRR,
+                                                  const StepData_Factors& theLocalFactors,
+                                                  TopoDS_Compound& theCund,
+                                                  Message_ProgressScope& thePS);
 
   StepToTopoDS_NMTool myNMTool;
   Standard_Real myPrecision;
