@@ -348,7 +348,9 @@ static Standard_Boolean OCC23774Test(const TopoDS_Face& grossPlateFace, const To
   gp_Trsf2d mirror11 = mirror1;
   mirror11.PreMultiply(mirror1);
 
+// clang-format off
   BRepExtrema_DistShapeShape distShapeShape2(grossPlateFace,step2ModifiedShape);//,Extrema_ExtFlag_MIN);
+// clang-format on
   if(!distShapeShape2.IsDone())
     return Standard_False;
 
@@ -1424,12 +1426,12 @@ static Standard_Integer OCC24271 (Draw_Interpretor& di,
     aMapRight.Add (aKeyIter);
   }
 
-  QCOMPARE (aMapLeft .Contains (aMapRight), Standard_False);
-  QCOMPARE (aMapRight.Contains (aMapLeft),  Standard_False);
+  QCOMPARE (NCollection_MapAlgo::Contains (aMapLeft, aMapRight), Standard_False);
+  QCOMPARE (NCollection_MapAlgo::Contains (aMapRight, aMapLeft),  Standard_False);
 
   // validate Union operation
   NCollection_Map<Standard_Integer> aMapUnion;
-  aMapUnion.Union (aMapLeft, aMapRight);
+  NCollection_MapAlgo::Union(aMapUnion, aMapLeft, aMapRight);
   QCOMPARE (aMapUnion.Extent(), aRightUpper - aLeftLower + 1);
   for (Standard_Integer aKeyIter = aLeftLower; aKeyIter <= aRightUpper; ++aKeyIter)
   {
@@ -1438,18 +1440,18 @@ static Standard_Integer OCC24271 (Draw_Interpretor& di,
 
   // validate Intersection operation
   NCollection_Map<Standard_Integer> aMapSect;
-  aMapSect.Intersection (aMapLeft, aMapRight);
+  NCollection_MapAlgo::Intersection(aMapSect, aMapLeft, aMapRight);
   QCOMPARE (aMapSect.Extent(), aLeftUpper - aRightLower + 1);
   for (Standard_Integer aKeyIter = aRightLower; aKeyIter <= aLeftUpper; ++aKeyIter)
   {
     QCOMPARE (aMapSect.Contains (aKeyIter), Standard_True);
   }
-  QCOMPARE (aMapLeft .Contains (aMapSect), Standard_True);
-  QCOMPARE (aMapRight.Contains (aMapSect), Standard_True);
+  QCOMPARE (NCollection_MapAlgo::Contains (aMapLeft, aMapSect), Standard_True);
+  QCOMPARE (NCollection_MapAlgo::Contains (aMapRight, aMapSect), Standard_True);
 
   // validate Substruction operation
   NCollection_Map<Standard_Integer> aMapSubsLR;
-  aMapSubsLR.Subtraction (aMapLeft, aMapRight);
+  NCollection_MapAlgo::Subtraction(aMapSubsLR, aMapLeft, aMapRight);
   QCOMPARE (aMapSubsLR.Extent(), aRightLower - aLeftLower);
   for (Standard_Integer aKeyIter = aLeftLower; aKeyIter < aRightLower; ++aKeyIter)
   {
@@ -1457,7 +1459,7 @@ static Standard_Integer OCC24271 (Draw_Interpretor& di,
   }
 
   NCollection_Map<Standard_Integer> aMapSubsRL;
-  aMapSubsRL.Subtraction (aMapRight, aMapLeft);
+  NCollection_MapAlgo::Subtraction(aMapSubsRL, aMapRight, aMapLeft);
   QCOMPARE (aMapSubsRL.Extent(), aRightUpper - aLeftUpper);
   for (Standard_Integer aKeyIter = aLeftUpper + 1; aKeyIter < aRightUpper; ++aKeyIter)
   {
@@ -1466,7 +1468,7 @@ static Standard_Integer OCC24271 (Draw_Interpretor& di,
 
   // validate Difference operation
   NCollection_Map<Standard_Integer> aMapDiff;
-  aMapDiff.Difference (aMapLeft, aMapRight);
+  NCollection_MapAlgo::Difference(aMapDiff, aMapLeft, aMapRight);
   QCOMPARE (aMapDiff.Extent(), aRightLower - aLeftLower + aRightUpper - aLeftUpper);
   for (Standard_Integer aKeyIter = aLeftLower; aKeyIter < aRightLower; ++aKeyIter)
   {
@@ -1489,10 +1491,10 @@ static Standard_Integer OCC24271 (Draw_Interpretor& di,
   aMapSect.Add (43);
 
   NCollection_Map<Standard_Integer> aMapCopy (aMapSwap);
-  QCOMPARE (aMapCopy.IsEqual (aMapSwap), Standard_True);
+  QCOMPARE (NCollection_MapAlgo::IsEqual(aMapCopy, aMapSwap), Standard_True);
   aMapCopy.Remove (34);
   aMapCopy.Add    (43);
-  QCOMPARE (aMapCopy.IsEqual (aMapSwap), Standard_False);
+  QCOMPARE (NCollection_MapAlgo::IsEqual(aMapCopy, aMapSwap), Standard_False);
 
   return 0;
 }
@@ -2013,7 +2015,7 @@ static Standard_Integer OCC24889 (Draw_Interpretor& theDI,
   DrawTrSurf::Set("c_2", aTrim[1]);
 
   // Intersection
-  const Standard_Real aTol = Precision::Confusion();
+  constexpr Standard_Real aTol = Precision::Confusion();
   Geom2dAPI_InterCurveCurve aIntTool( aTrim[0], aTrim[1], aTol );
 
   const IntRes2d_IntersectionPoint& aIntPnt =
@@ -2247,8 +2249,10 @@ static Standard_Integer OCC24925 (Draw_Interpretor& theDI,
   Standard_Integer anArgIter = 1;
   TCollection_ExtendedString aFileName = theArgVec[anArgIter++];
   TCollection_AsciiString    aPlugin   = "TKXml";
+// clang-format off
   TCollection_AsciiString    aSaver    = "03a56820-8269-11d5-aab2-0050044b1af1"; // XmlStorageDriver   in XmlDrivers.cxx
   TCollection_AsciiString    aLoader   = "03a56822-8269-11d5-aab2-0050044b1af1"; // XmlRetrievalDriver in XmlDrivers.cxx
+// clang-format on
   if (anArgIter < theArgNb)
   {
     aPlugin = theArgVec[anArgIter++];
@@ -3871,7 +3875,7 @@ Standard_Integer OCC26446 (Draw_Interpretor& di,
   TColGeom_Array1OfBSplineCurve          aCurves     (0, 1);
   TColStd_Array1OfReal                   aTolerances (0, 0);
   Standard_Real                          aTolConf    = 1.e-3;
-  Standard_Real                          aTolClosure = Precision::Confusion();
+  constexpr Standard_Real                aTolClosure = Precision::Confusion();
   Handle(TColGeom_HArray1OfBSplineCurve) aConcatCurves;
   Handle(TColStd_HArray1OfInteger)       anIndices;
 

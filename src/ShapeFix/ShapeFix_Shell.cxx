@@ -146,7 +146,9 @@ Standard_Boolean ShapeFix_Shell::Perform(const Message_ProgressRange& theProgres
       if (aSas.HasFreeEdges())
       {
         aCurShell.Closed (Standard_False);
+// clang-format off
         SendWarning (Message_Msg ("FixAdvShell.FixClosedFlag.MSG0"));//Shell has incorrect flag isClosed
+// clang-format on
       }
       aSas.Clear();
 	}
@@ -260,7 +262,7 @@ static  Standard_Boolean GetShells(TopTools_SequenceOfShape& Lface,
       aMapFaceShells.Bind(F1,nshell);
       Lface.Remove(i);
       
-      // check if closed shell is obtained in multy connex mode and add to sequence of 
+      // check if closed shell is obtained in multi connex mode and add to sequence of 
       // shells and new shell begin to construct.
       // (check is n*2)
       if(isMultiConnex && BRep_Tool::IsClosed (nshell)) {
@@ -300,7 +302,7 @@ static  Standard_Boolean GetShells(TopTools_SequenceOfShape& Lface,
       numFace++;
     }
     if(numFace >1) {
-      // close all closed shells in no multy connex mode
+      // close all closed shells in no multi connex mode
       if(!isMultiConnex)
         nshell.Closed (BRep_Tool::IsClosed (nshell));
       aSeqShells.Append(nshell);
@@ -514,7 +516,7 @@ static Standard_Integer BoxIn(const Bnd_Box& theBox1,const Bnd_Box& theBox2)
 //=======================================================================
 // function : GetClosedShells
 // purpose  : Check if one shell is a part from other shell.
-//            For case of compsolid when afew shells are created from
+//            For case of compsolid when a few shells are created from
 //            the same set of faces.
 //=======================================================================
 static void GetClosedShells(TopTools_SequenceOfShape& Shells, TopTools_SequenceOfShape& aRemainShells)
@@ -883,7 +885,9 @@ Standard_Boolean ShapeFix_Shell::FixFaceOrientation(
   if (BRep_Tool::IsClosed(myShell)? isFreeBoundaries : !isFreeBoundaries)
   {
     myShell.Closed (!isFreeBoundaries);
+// clang-format off
     SendWarning (Message_Msg ("FixAdvShell.FixClosedFlag.MSG0"));//Shell has incorrect flag isClosed
+// clang-format on
   }
   Standard_Boolean isGetShells = Standard_True;
   //Gets possible shells with taking in account of multiconnexity.
@@ -946,7 +950,9 @@ Standard_Boolean ShapeFix_Shell::FixFaceOrientation(
     
     done = Standard_True;
     myStatus = ShapeExtend::EncodeStatus (ShapeExtend_FAIL);
+// clang-format off
     SendWarning ( Message_Msg ( "FixAdvShell.FixOrientation.MSG20" ) );// Impossible to orient faces in shell, several shells created
+// clang-format on
     return Standard_True;
   }
   if(aNumMultShell >1) {
@@ -1002,9 +1008,11 @@ Standard_Boolean ShapeFix_Shell::FixFaceOrientation(
     if(!Context().IsNull())
       Context()->Replace(shell, myShape);
     if ( myNbShells == 1 )
+// clang-format off
       SendWarning ( Message_Msg ( "FixAdvShell.FixOrientation.MSG0" ) );// Faces were incorrectly oriented in the shell, corrected
     else
       SendWarning ( Message_Msg ( "FixAdvShell.FixOrientation.MSG30" ) );// Improperly connected shell split into parts
+// clang-format on
     return Standard_True;
   }
   else return Standard_False;

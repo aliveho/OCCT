@@ -127,7 +127,7 @@ public:
   //! Destructor cleans allocated memory of all fields
   ~StepFile_ReadData() { ClearRecorder(3); }
 
-  //! Preperes the text value for analysis.
+  //! Prepares the text value for analysis.
   //! It is the main tool for transferring data from flex to bison
   //! If characters page is full, allocates a new page.
   void CreateNewText(const char* theNewText, int theLenText);
@@ -243,8 +243,10 @@ private:
   Standard_Integer myNbPar;      //!< Total number of parameters read
   Standard_Integer myYaRec;      //!< Presence record already created (after 1 Ident)
   Standard_Integer myNumSub;     //!< Number of current sublist
+// clang-format off
   Standard_Boolean myErrorArg;   //!< Control of error argument (true - error argument was created)
   char* myResText;               //!< Text value written by Flex and passed to Bison to create record
+// clang-format on
   char* myCurrType;              //!< Type of last record read
   char* mySubArg;                //!< Ident last record (possible sub-list)
   Interface_ParamType myTypeArg; //!< Type of last argument read

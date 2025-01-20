@@ -145,7 +145,7 @@ public:
   //! Returns the value of the perceptual difference between this color
   //! and @p theOther, computed using the CIEDE2000 formula.
   //! The difference is in range [0, 100.], with 1 approximately corresponding
-  //! to the minimal percievable difference (usually difference 5 or greater is
+  //! to the minimal perceivable difference (usually difference 5 or greater is
   //! needed for the difference to be recognizable in practice).
   Standard_EXPORT Standard_Real DeltaE2000 (const Quantity_Color& theOther) const;
 
@@ -237,8 +237,8 @@ public:
   //! So the output is formatted as 0x00RRGGBB.
   //! Note that this unpacking does NOT involve non-linear sRGB -> linear RGB conversion,
   //! as would be usually expected for RGB color packed into 4 bytes.
-  //! @param theColor [in] color to convert
-  //! @param theARGB [out] result color encoded as integer
+  //! @param[in] theColor  color to convert
+  //! @param[out] theARGB  result color encoded as integer
   static void Color2argb (const Quantity_Color& theColor,
                           Standard_Integer& theARGB)
   {

@@ -115,7 +115,7 @@ static void VmsExtract(const TCollection_AsciiString& what,
   trek = buffer.Token("[]");
 
   if (trek.Value(1) == '.') trek.Remove(1,1);  // Removes first '.'
-    else trek.Insert(1,'|');                   // Add root
+  else trek.Insert(1,'|');                   // Add root
 
   trek.ChangeAll('.','|');   // Translates to portable syntax
   trek.ChangeAll('-','^');  
@@ -699,7 +699,7 @@ OSD_SysType pType;
     }
 
     if (Way.Length()!=0)
-     FullName = FullName + Way + "\\";
+      FullName = FullName + Way + "\\";
     
     FullName += myName; 
     FullName += myExtension;
@@ -1521,7 +1521,6 @@ TCollection_AsciiString OSD_Path::RelativePath(
   TCollection_AsciiString EmptyString = "" ;
   TCollection_AsciiString FilePath ;
   Standard_Integer len ;
-  Standard_Integer i, n ;
   Standard_Boolean Wnt = 0 ;
 
   FilePath = aAbsFilePath ;
@@ -1554,14 +1553,14 @@ TCollection_AsciiString OSD_Path::RelativePath(
   TCollection_AsciiString DirToken, FileToken ;
   Standard_Boolean Sibling = 0 ;
 
-  for (i = n = 1 ;; n++) {
+  for (Standard_Integer n = 1 ;; n++) {
       DirToken = aDirPath.Token("/\\",n) ;
       if (DirToken.IsEmpty())
           return FilePath ;
 
       if (!Sibling) {
           len = FilePath.Length() ;
-          i = FilePath.Search("/") ;
+          Standard_Integer i = FilePath.Search("/") ;
           if (i > 0) {
               if (i == len)
                   return EmptyString ;
@@ -1680,7 +1679,9 @@ void OSD_Path::FileNameAndExtension (const TCollection_AsciiString& theFilePath,
                                      TCollection_AsciiString&       theName,
                                      TCollection_AsciiString&       theExtension)
 {
+// clang-format off
   const Standard_Integer THE_EXT_MAX_LEN = 20; // this method is supposed to be used with normal extension
+// clang-format on
   const Standard_Integer aLen = theFilePath.Length();
   for (Standard_Integer anExtLen = 1; anExtLen < aLen && anExtLen < THE_EXT_MAX_LEN; ++anExtLen)
   {

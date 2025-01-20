@@ -170,8 +170,8 @@ public:
   void SetRenderFilter (Standard_Integer theFilter) { myRenderFilter = theFilter; }
 
   //! Checks whether the element can be rendered or not.
-  //! @param theElement [in] the element to check
-  //! @param theGroup   [in] the group containing the element
+  //! @param[in] theElement  the element to check
+  //! @param[in] theGroup    the group containing the element
   //! @return True if element can be rendered
   bool ShouldRender (const OpenGl_Element* theElement, const OpenGl_Group* theGroup);
 
@@ -210,8 +210,10 @@ protected: //! @name protected fields
 
 protected: //! @name fields related to status
 
+// clang-format off
   Standard_Integer myNbSkippedTranspElems; //!< counter of skipped transparent elements for OpenGl_LayerList two rendering passes method
   Standard_Integer myRenderFilter;         //!< active filter for skipping rendering of elements by some criteria (multiple render passes)
+// clang-format on
 
   OpenGl_Aspects   myDefaultAspects;
   const OpenGl_Aspects*      myAspectsSet;

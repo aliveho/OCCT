@@ -825,14 +825,14 @@ Standard_Boolean ShapeAnalysis_CanonicalRecognition::GetSurfaceByLS(const TopoDS
   Standard_Real aRelDev = 0.2; //Customer can set parameters of sample surface
                                // with relative precision about aRelDev.
                                // For example, if radius of sample surface is R,
-                               // it means, that "exact" vaue is in interav 
-                               //[R - aRelDev*R, R + aRelDev*R]. This intrrval is set
-                               // for R as boundary values for dptimization algo.
+                               // it means, that "exact" value is in interav 
+                               //[R - aRelDev*R, R + aRelDev*R]. This interval is set
+                               // for R as boundary values for optimization algo.
   FillSolverData(theTarget, thePos, theParams,
                  aStartPoint, aFBnd, aLBnd, aRelDev);
 
   //
-  Standard_Real aTol = Precision::Confusion();
+  constexpr Standard_Real aTol = Precision::Confusion();
   math_MultipleVarFunction* aPFunc; 
   GeomConvert_FuncSphereLSDist aFuncSph(aPoints);
   GeomConvert_FuncCylinderLSDist aFuncCyl(aPoints, thePos.Direction());
@@ -878,7 +878,7 @@ Standard_Boolean ShapeAnalysis_CanonicalRecognition::GetSurfaceByLS(const TopoDS
   if (theTarget == GeomAbs_Cylinder || theTarget == GeomAbs_Cone)
   {
     //Set search direction for location to be perpendicular to axis to avoid
-    //seaching along axis
+    //searching along axis
     const gp_Dir aDir = thePos.Direction();
     gp_Pln aPln(thePos.Location(), aDir);
     gp_Dir aUDir = aPln.Position().XDirection();

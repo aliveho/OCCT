@@ -21,7 +21,7 @@
 //#60 rln 29.12.98 PRO17015
 //:l3 abv 11.01.99: CATIA01.igs: using less values for checking short lines
 //%11 pdn 12.01.98 CTS22023 correcting used tolerances
-//sln 29.12.2001 OCC90 : Method checkBSplineCurve and varification before creation of bspline curves were added
+//sln 29.12.2001 OCC90 : Method checkBSplineCurve and verification before creation of bspline curves were added
 //=======================================================================
 
 #include <ElCLib.hxx>
@@ -80,7 +80,7 @@
 //=======================================================================
 //function : CheckBSplineCurve
 //purpose  : Check coincidede knots Check whether knots are in ascending 
-//           order and difference between vaues of weights more than 1000. 
+//           order and difference between values of weights more than 1000. 
 //           Send corresponding messages. The function returns Standard_False 
 //           if curve can not be created, Standard_True otherwise.
 //=======================================================================
@@ -89,7 +89,7 @@ static Standard_Boolean checkBSplineCurve(IGESToBRep_BasicCurve*               t
                                           TColStd_Array1OfReal&                CKnots,
                                           const TColStd_Array1OfReal&          CWeights)
 {
-  // check whether difference between vaues of weights more than 1000.
+  // check whether difference between values of weights more than 1000.
   if(!theBSplineCurve->IsPolynomial()) {
     Standard_Real aMinValue = CWeights.Value(CWeights.Lower());
     Standard_Real aMaxValue = CWeights.Value(CWeights.Lower());
@@ -343,7 +343,7 @@ Handle(Geom_Curve) IGESToBRep_BasicCurve::TransferConicArc
     //The dimensions should be also obliged:
     //[a]=[b]=[c]=L^-2
     //if ( (Abs(a-c) <= GetEpsGeom()) && (Abs(b) < GetEpsCoeff()))
-    Standard_Real eps2 = Precision::PConfusion() * Precision::PConfusion();
+    constexpr Standard_Real eps2 = Precision::PConfusion() * Precision::PConfusion();
     if ( (Abs(a-c) <= eps2) && (Abs(b) < eps2)) {
     
 //                          =================
@@ -512,7 +512,7 @@ Handle(Geom2d_Curve) IGESToBRep_BasicCurve::Transfer2dConicArc
 
     //#60 rln 29.12.98 PRO17015
     //if ( (Abs(a-c) <= GetEpsGeom()) && (Abs(b) < GetEpsCoeff()))
-    Standard_Real eps2 = Precision::PConfusion() * Precision::PConfusion();
+    constexpr Standard_Real eps2 = Precision::PConfusion() * Precision::PConfusion();
     if ( (Abs(a-c) <= eps2) && (Abs(b) < eps2)) {
 
       //                          =================
@@ -589,7 +589,9 @@ Handle(Geom2d_Curve) IGESToBRep_BasicCurve::Transfer2dConicArc
 
     if (!st->IsClosed()) {
 
+// clang-format off
       gp_Elips2d elips = Handle(Geom2d_Ellipse)::DownCast(res)->Elips2d();//#45 rln (frame, majorRadius, minorRadius);
+// clang-format on
       
       t1  = ElCLib::Parameter(elips, startPoint);
       t2  = ElCLib::Parameter(elips, endPoint);
@@ -609,7 +611,9 @@ Handle(Geom2d_Curve) IGESToBRep_BasicCurve::Transfer2dConicArc
     if (st->TransformedAxis().IsOpposite (st->Axis(), GetEpsilon()))
       res->Reverse();
 
+// clang-format off
     gp_Hypr2d hpr = Handle(Geom2d_Hyperbola)::DownCast(res)->Hypr2d();//#45 rln (frame, majorRadius, minorRadius);
+// clang-format on
    
     t1 = ElCLib::Parameter(hpr, startPoint);
     t2 = ElCLib::Parameter(hpr, endPoint);
@@ -719,7 +723,9 @@ Handle(Geom2d_Curve) IGESToBRep_BasicCurve::Transfer2dCircularArc
   if (!st->TransformedAxis().IsParallel /*#45 rln 23.11.98 IsEqual*/(st->Axis(), GetEpsilon())) {
     SetModeTransfer(Standard_True);          // Only not to use Trsf
     Message_Msg msg1165("IGES_1165");
+// clang-format off
     SendWarning(st, msg1165); //"The Trsf is not compatible with a transfer2d, it will not applied."
+// clang-format on
   }
 
   if (!GetModeTransfer() && st->HasTransf()) {

@@ -39,9 +39,11 @@ struct SwsContext;
 //! Please refer to FFmpeg documentation for defining text values.
 struct Image_VideoParams
 {
+// clang-format off
   TCollection_AsciiString Format;           //!< [optional]  video format (container), if empty - will be determined from the file name
   TCollection_AsciiString VideoCodec;       //!< [optional]  codec identifier, if empty - default codec from file format will be used
   TCollection_AsciiString PixelFormat;      //!< [optional]  pixel format, if empty - default codec pixel format will be used
+// clang-format on
   Standard_Integer        Width;            //!< [mandatory] video frame width
   Standard_Integer        Height;           //!< [mandatory] video frame height
   Standard_Integer        FpsNum;           //!< [mandatory] framerate numerator
@@ -85,8 +87,8 @@ public:
   Standard_EXPORT void Close();
 
   //! Open output stream - initialize recorder.
-  //! @param theFileName [in] video filename
-  //! @param theParams   [in] video parameters
+  //! @param[in] theFileName  video filename
+  //! @param[in] theParams    video parameters
   Standard_EXPORT Standard_Boolean Open (const char* theFileName,
                                          const Image_VideoParams& theParams);
 
@@ -109,8 +111,8 @@ protected:
   Standard_EXPORT TCollection_AsciiString formatAvError (const int theError) const;
 
   //! Append video stream.
-  //! theParams     [in] video parameters
-  //! theDefCodecId [in] identifier of codec managed by FFmpeg library (AVCodecID enum)
+  //! theParams[in]      video parameters
+  //! theDefCodecId[in]  identifier of codec managed by FFmpeg library (AVCodecID enum)
   Standard_EXPORT Standard_Boolean addVideoStream (const Image_VideoParams& theParams,
                                                    const Standard_Integer   theDefCodecId);
 

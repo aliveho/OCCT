@@ -622,7 +622,7 @@ goto find_rule; \
 
 typedef step::parser::token token;
 
-/* skl 31.01.2002 for OCC133(OCC96,97) - uncorrect
+/* skl 31.01.2002 for OCC133(OCC96,97) - incorrect
 long string in files Henri.stp and 401.stp*/
 #include <Standard_Failure.hxx>
 #define YY_FATAL_ERROR(msg) Standard_Failure::Raise(msg);
@@ -1318,7 +1318,7 @@ int yyFlexLexer::LexerInput( char* buf, int max_size )
 	if ( yyin.bad() )
 		return -1;
 	else
-		return yyin.gcount();
+		return static_cast<int>(yyin.gcount());
 #endif
 }
 

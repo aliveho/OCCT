@@ -871,6 +871,7 @@ private:
   Handle(BRepAlgo_AsDes) myAsDes;       //!< Ascendants/descendants of the edges faces
   const BRepOffset_Analyse* myAnalyzer; //!< Analyzer of the input parameters
 
+// clang-format off
   TopTools_DataMapOfShapeListOfShape* myEdgesOrigins; //!< Origins of the offset edges (binding between offset edge and original edge)
   TopTools_DataMapOfShapeShape* myFacesOrigins;       //!< Origins of the offset faces (binding between offset face and original face)
   TopTools_DataMapOfShapeShape* myETrimEInf;          //!< Binding between trimmed and infinite edge
@@ -904,6 +905,7 @@ private:
 
   TopTools_IndexedDataMapOfShapeListOfShape myFacesToRebuild; //!< Faces that have to be rebuilt (invalid and close to invalid faces)
   TopTools_MapOfShape myFSelfRebAvoid;                        //!< Faces that have to be avoided when rebuilding splits of the same offset face
+// clang-format on
 
   TopoDS_Shape mySolids; //!< Solids built from the splits of faces
 
@@ -3362,7 +3364,7 @@ Standard_Boolean BRepOffset_BuildOffsetFaces::CheckInvertedBlock (const TopoDS_S
       GetVerticesOnEdges (aCB1, myInvertedEdges, *pMVInverted1, *pMVAll1);
     }
     //
-    if (pMVInverted->HasIntersection (*pMVAll1))
+    if (NCollection_MapAlgo::HasIntersection(*pMVInverted, *pMVAll1))
     {
       return Standard_False;
     }
@@ -5886,8 +5888,8 @@ void BRepOffset_BuildOffsetFaces::IntersectFaces (TopTools_MapOfShape& theVertsT
           mapShapes(*aLFImi, TopAbs_EDGE, aMEVIm);
           mapShapes(*aLFImi, TopAbs_VERTEX, aMEVIm);
 
-          Standard_Boolean isIContainsE = aMEVIm.HasIntersection(anInsideEdges);
-          Standard_Boolean isIContainsV = aMEVIm.HasIntersection(anInsideVertices);
+          Standard_Boolean isIContainsE = NCollection_MapAlgo::HasIntersection(aMEVIm, anInsideEdges);
+          Standard_Boolean isIContainsV = NCollection_MapAlgo::HasIntersection(aMEVIm, anInsideVertices);
 
           for (j = i + 1; j <= aNb; ++j)
           {
@@ -5914,8 +5916,8 @@ void BRepOffset_BuildOffsetFaces::IntersectFaces (TopTools_MapOfShape& theVertsT
             mapShapes(*aLFImj, TopAbs_VERTEX, aMEVIm);
             // check images of both faces contain anInsideEdges and anInsideVertices
             // not process if false and true 
-            Standard_Boolean isJContainsE = aMEVIm.HasIntersection(anInsideEdges);
-            Standard_Boolean isJContainsV = aMEVIm.HasIntersection(anInsideVertices);
+            Standard_Boolean isJContainsE = NCollection_MapAlgo::HasIntersection(aMEVIm, anInsideEdges);
+            Standard_Boolean isJContainsV = NCollection_MapAlgo::HasIntersection(aMEVIm, anInsideVertices);
 
             // Check if one face is connected to inside edge then
             // the other must be also connected

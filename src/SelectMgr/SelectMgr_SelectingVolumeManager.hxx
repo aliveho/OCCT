@@ -225,9 +225,9 @@ public:
 
   //! Valid for point selection only!
   //! Computes depth range for clipping planes.
-  //! @param theViewPlanes  [in] global view planes
-  //! @param theObjPlanes   [in] object planes
-  //! @param theWorldSelMgr [in] selection volume in world space for computing clipping plane ranges
+  //! @param[in] theViewPlanes   global view planes
+  //! @param[in] theObjPlanes    object planes
+  //! @param[in] theWorldSelMgr  selection volume in world space for computing clipping plane ranges
   Standard_EXPORT void SetViewClipping (const Handle(Graphic3d_SequenceOfHClipPlane)& theViewPlanes,
                                         const Handle(Graphic3d_SequenceOfHClipPlane)& theObjPlanes,
                                         const SelectMgr_SelectingVolumeManager* theWorldSelMgr);
@@ -288,10 +288,12 @@ public:
 
 private:
   Handle(SelectMgr_BaseIntersector)      myActiveSelectingVolume;
+// clang-format off
   Handle(Graphic3d_SequenceOfHClipPlane) myViewClipPlanes;                  //!< view clipping planes
   Handle(Graphic3d_SequenceOfHClipPlane) myObjectClipPlanes;                //!< object clipping planes
   SelectMgr_ViewClipRange                myViewClipRange;
   Standard_Boolean                       myToAllowOverlap;                  //!< Defines if partially overlapped entities will me detected or not
+// clang-format on
 };
 
 #endif

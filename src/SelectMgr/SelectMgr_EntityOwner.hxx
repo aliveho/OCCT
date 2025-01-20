@@ -137,7 +137,7 @@ public:
   Standard_Boolean IsSelected() const { return myIsSelected; }
 
   //! Set the state of the owner.
-  //! @param theIsSelected [in] shows if owner is selected.
+  //! @param[in] theIsSelected  shows if owner is selected.
   void SetSelected (const Standard_Boolean theIsSelected) { myIsSelected = theIsSelected; }
 
   //! If the object needs to be selected, it returns true.
@@ -210,9 +210,11 @@ public:
 protected:
 
   SelectMgr_SelectableObject* mySelectable;        //!< raw pointer to selectable object
+// clang-format off
   Standard_Integer            mypriority;          //!< selection priority (for result with the same depth)
   Standard_Boolean            myIsSelected;        //!< flag indicating selected state
   Standard_Boolean            myFromDecomposition; //!< flag indicating this owner points to a part of object (TRUE) or to entire object (FALSE)
+// clang-format on
 
 };
 

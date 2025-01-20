@@ -52,7 +52,7 @@ void math_BissecNewton::Perform(math_FunctionWithDerivative& F,
   Standard_Boolean GOOD;
   Standard_Integer j;
   Standard_Real dxold, fh, fl;
-  Standard_Real swap, temp, xh, xl;
+  Standard_Real temp, xh, xl;
   
   GOOD = F.Values(Bound1, fl, df);
   if(!GOOD) {
@@ -67,7 +67,7 @@ void math_BissecNewton::Perform(math_FunctionWithDerivative& F,
     return;
   }
 //  Modified by Sergey KHROMOV - Wed Jan 22 12:06:45 2003 Begin
-  Standard_Real aFTol = RealEpsilon();
+  constexpr Standard_Real aFTol = RealEpsilon();
 
 //   if(fl * fh >= 0.0) {
   if(fl * fh > aFTol*aFTol) {
@@ -83,9 +83,6 @@ void math_BissecNewton::Perform(math_FunctionWithDerivative& F,
   else {
     xl = Bound2;
     xh = Bound1;
-    swap = fl;
-    fl = fh;
-    fh = swap;
   }
 //  Modified by Sergey KHROMOV - Wed Jan 22 12:06:49 2003 End
   x = 0.5 * (Bound1 + Bound2);
@@ -133,11 +130,9 @@ void math_BissecNewton::Perform(math_FunctionWithDerivative& F,
     }
     if(f < 0.0) {
       xl = x;
-      fl = f;
     }
     else if(f > 0.0) {
       xh = x;
-      fh = f;
     }
     else {
       TheStatus = math_OK;

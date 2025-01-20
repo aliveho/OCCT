@@ -252,7 +252,7 @@ static void Function_SetUVBounds(Standard_Real& myU1,
 
     case GeomAbs_Cone:    {
       Standard_Real tol = Epsilon(1.);
-      Standard_Real ptol = Precision::PConfusion();
+      constexpr Standard_Real ptol = Precision::PConfusion();
       gp_Cone Cone = mySurface->Cone();
       VCouture = Standard_False;
       //Calculation of cone parameters for P == ConeApex often produces wrong
@@ -655,7 +655,7 @@ static void Function_SetUVBounds(Standard_Real& myU1,
         // si P1.Z() vaut +/- R on est sur le sommet : pas significatif.
         gp_Pnt pp = P1.Transformed(Trsf);
 
-        if ( Abs( Abs(pp.Z()) - R) < Tol) {
+        if ( Abs(pp.X() * pp.X() + pp.Y() * pp.Y() + pp.Z() * pp.Z() - R * R) < Tol) {
           gp_Pnt Center = Circle.Location();
           Standard_Real U,V;
           ElSLib::SphereParameters(gp_Ax3(gp::XOY()),1,Center, U, V);

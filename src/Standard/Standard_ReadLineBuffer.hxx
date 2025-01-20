@@ -54,7 +54,7 @@ public:
   //!         (in case of NULL result theStream should be checked externally to identify the presence of errors).
   //!          Empty lines will be returned also with zero length.
   //! @param theStream [inout] - the stream to read from.
-  //! @param theLineLength [out] - output parameter defined length of returned line.
+  //! @param[out] theLineLength  - output parameter defined length of returned line.
   template<typename Stream_T>
   const char* ReadLine (Stream_T& theStream,
                         size_t& theLineLength)
@@ -68,8 +68,8 @@ public:
   //!         (in case of NULL result theStream should be checked externally to identify the presence of errors).
   //!          Empty lines will be returned also with zero length.
   //! @param theStream [inout] - the stream to read from.
-  //! @param theLineLength [out] - output parameter defined length of returned line.
-  //! @param theReadData   [out] - output parameter defined the number of elements successfully read from the stream during this call,
+  //! @param[out] theLineLength  - output parameter defined length of returned line.
+  //! @param[out] theReadData    - output parameter defined the number of elements successfully read from the stream during this call,
   //!                              it can be zero if no data was read and the line is taken from the buffer.
   template<typename Stream_T>
   const char* ReadLine (Stream_T& theStream,
@@ -261,8 +261,8 @@ public:
   bool ToPutGapInMultiline() const { return myToPutGapInMultiline; }
 
   //! Sets or unsets the multi-line mode.
-  //! @param theMultilineMode [in] multiline mode flag
-  //! @param theToPutGap      [in] put gap space while connecting lines (no gap otherwise)
+  //! @param[in] theMultilineMode  multiline mode flag
+  //! @param[in] theToPutGap       put gap space while connecting lines (no gap otherwise)
   void SetMultilineMode (bool theMultilineMode,
                          bool theToPutGap = true)
   {
@@ -296,11 +296,13 @@ protected:
 
   std::vector<char> myReadBuffer;           //!< Temp read buffer
   std::vector<char> myReadBufferLastStr;    //!< Part of last string of myReadBuffer
+// clang-format off
   bool              myUseReadBufferLastStr; //!< Flag to use myReadBufferLastStr during next line reading
   bool              myIsMultilineMode;      //!< Flag to process of the special multi-line case at the end of the line
   bool              myToPutGapInMultiline;  //!< Flag to put gap space while joining lines in multi-line syntax
   size_t            myBufferPos;            //!< Current position in myReadBuffer
   size_t            myBytesLastRead;        //!< The number of characters that were read last time from myReadBuffer.
+// clang-format on
 };
 
 #endif // _Standard_ReadLineBuffer_HeaderFile

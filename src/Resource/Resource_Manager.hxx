@@ -57,10 +57,10 @@ public:
   Standard_EXPORT Resource_Manager();
 
   //! Create a Resource manager.
-  //! @param theName [in] description file name
-  //! @param theDefaultsDirectory  [in] default folder for looking description file
-  //! @param theUserDefaultsDirectory [in] user folder for looking description file
-  //! @param theIsVerbose [in] print verbose messages
+  //! @param[in] theName  description file name
+  //! @param[in] theDefaultsDirectory   default folder for looking description file
+  //! @param[in] theUserDefaultsDirectory  user folder for looking description file
+  //! @param[in] theIsVerbose  print verbose messages
   Standard_EXPORT Resource_Manager (const TCollection_AsciiString& theName,
                                     const TCollection_AsciiString& theDefaultsDirectory,
                                     const TCollection_AsciiString& theUserDefaultsDirectory,
@@ -116,6 +116,9 @@ public:
 
   //! Returns internal Ref or User map with parameters 
   Standard_EXPORT Resource_DataMapOfAsciiStringAsciiString& GetMap(Standard_Boolean theRefMap = Standard_True);
+
+  //! Returns true if Resource have been found
+  Standard_Boolean IsInitialized() const { return myInitialized; }
   
 private:
 
@@ -129,6 +132,7 @@ private:
   Resource_DataMapOfAsciiStringAsciiString myUserMap;
   Resource_DataMapOfAsciiStringExtendedString myExtStrMap;
   Standard_Boolean myVerbose;
+  Standard_Boolean myInitialized;
 
 };
 

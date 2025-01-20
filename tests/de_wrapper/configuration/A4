@@ -15,6 +15,7 @@ global.priority.XCAF :   OCC
 global.priority.IGES :   OCC
 global.priority.PLY :    OCC
 global.general.length.unit :     1
+global.general.system.unit :     1
 provider.STEP.OCC.read.iges.bspline.continuity :         1
 provider.STEP.OCC.read.precision.mode :  0
 provider.STEP.OCC.read.precision.val :   0.0001
@@ -47,7 +48,7 @@ provider.STEP.OCC.read.props :   1
 provider.STEP.OCC.read.metadata :   1
 provider.STEP.OCC.write.precision.mode :         0
 provider.STEP.OCC.write.precision.val :  0.0001
-provider.STEP.OCC.write.assembly :       0
+provider.STEP.OCC.write.assembly :       2
 provider.STEP.OCC.write.schema :         1
 provider.STEP.OCC.write.tessellated :    2
 provider.STEP.OCC.write.product.name :
@@ -80,7 +81,6 @@ provider.IGES.OCC.read.name :    1
 provider.IGES.OCC.read.layer :   1
 provider.IGES.OCC.write.brep.mode :      0
 provider.IGES.OCC.write.convertsurface.mode :    0
-provider.IGES.OCC.write.unit :   2
 provider.IGES.OCC.write.header.author :
 provider.IGES.OCC.write.header.company :
 provider.IGES.OCC.write.header.product :

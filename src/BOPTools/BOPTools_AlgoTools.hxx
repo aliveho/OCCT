@@ -182,7 +182,7 @@ public: //! @name Point/Edge/Face classification relatively solid
   //! Computes the 3-D state of the point thePoint
   //! toward solid theSolid.
   //! theTol - value of precision of computation
-  //! theContext- cahed geometrical tools
+  //! theContext- cached geometrical tools
   //! Returns 3-D state.
   Standard_EXPORT static TopAbs_State ComputeState(const gp_Pnt& thePoint,
                                                    const TopoDS_Solid& theSolid,
@@ -192,7 +192,7 @@ public: //! @name Point/Edge/Face classification relatively solid
   //! Computes the 3-D state of the vertex theVertex
   //! toward solid theSolid.
   //! theTol - value of precision of computation
-  //! theContext- cahed geometrical tools
+  //! theContext- cached geometrical tools
   //! Returns 3-D state.
   Standard_EXPORT static TopAbs_State ComputeState(const TopoDS_Vertex& theVertex,
                                                    const TopoDS_Solid& theSolid,
@@ -202,7 +202,7 @@ public: //! @name Point/Edge/Face classification relatively solid
   //! Computes the 3-D state of the edge theEdge
   //! toward solid theSolid.
   //! theTol - value of precision of computation
-  //! theContext- cahed geometrical tools
+  //! theContext- cached geometrical tools
   //! Returns 3-D state.
   Standard_EXPORT static TopAbs_State ComputeState(const TopoDS_Edge& theEdge,
                                                   const TopoDS_Solid& theSolid,
@@ -213,7 +213,7 @@ public: //! @name Point/Edge/Face classification relatively solid
   //! toward solid theSolid.
   //! theTol - value of precision of computation
   //! theBounds - set of edges of <theSolid> to avoid
-  //! theContext- cahed geometrical tools
+  //! theContext- cached geometrical tools
   //! Returns 3-D state.
   Standard_EXPORT static TopAbs_State ComputeState(const TopoDS_Face& theFace,
                                                    const TopoDS_Solid& theSolid,
@@ -224,7 +224,7 @@ public: //! @name Point/Edge/Face classification relatively solid
   //! Computes the 3-D state of the shape theShape
   //! toward solid theSolid.
   //! theTol - value of precision of computation
-  //! theContext- cahed geometrical tools
+  //! theContext- cached geometrical tools
   //! Returns 3-D state.
   Standard_EXPORT static TopAbs_State ComputeStateByOnePoint(const TopoDS_Shape& theShape,
                                                              const TopoDS_Solid& theSolid,
@@ -274,7 +274,7 @@ public: //! @name Face classification relatively solid
   //! solid theSolid.
   //! theMEF - Map Edge/Faces for theSolid
   //! theTol - value of precision of computation
-  //! theContext- cahed geometrical tools
+  //! theContext- cached geometrical tools
   Standard_EXPORT static Standard_Boolean IsInternalFace(const TopoDS_Face& theFace,
                                                          const TopoDS_Solid& theSolid,
                                                          TopTools_IndexedDataMapOfShapeListOfShape& theMEF,
@@ -321,10 +321,10 @@ public: //! @name Choosing correct orientation for the split shape
   //! - 100 - bad types.
   //! In case of any error the method always returns FALSE.
   //!
-  //! @param theSplit [in] Split shape
-  //! @param theShape [in] Original shape
-  //! @param theContext [in] cached geometrical tools
-  //! @param theError [out] Error Status of the operation
+  //! @param[in] theSplit  Split shape
+  //! @param[in] theShape  Original shape
+  //! @param[in] theContext  cached geometrical tools
+  //! @param[out] theError  Error Status of the operation
   Standard_EXPORT static Standard_Boolean IsSplitToReverse(const TopoDS_Shape& theSplit,
                                                            const TopoDS_Shape& theShape,
                                                            const Handle(IntTools_Context)& theContext,
@@ -354,10 +354,10 @@ public: //! @name Choosing correct orientation for the split shape
   //! - 4 - unable to compute the normal for the original face.
   //! In case of any error the method always returns FALSE.
   //!
-  //! @param theSplit [in] Split face
-  //! @param theShape [in] Original face
-  //! @param theContext [in] cached geometrical tools
-  //! @param theError [out] Error Status of the operation
+  //! @param[in] theSplit  Split face
+  //! @param[in] theShape  Original face
+  //! @param[in] theContext  cached geometrical tools
+  //! @param[out] theError  Error Status of the operation
   Standard_EXPORT static Standard_Boolean IsSplitToReverse(const TopoDS_Face& theSplit,
                                                            const TopoDS_Face& theShape,
                                                            const Handle(IntTools_Context)& theContext,
@@ -379,10 +379,10 @@ public: //! @name Choosing correct orientation for the split shape
   //! - 4 - unable to compute the tangent vector for the original edge;
   //! In case of any error the method always returns FALSE.
   //!
-  //! @param theSplit [in] Split edge
-  //! @param theShape [in] Original edge
-  //! @param theContext [in] cached geometrical tools
-  //! @param theError [out] Error Status of the operation
+  //! @param[in] theSplit  Split edge
+  //! @param[in] theShape  Original edge
+  //! @param[in] theContext  cached geometrical tools
+  //! @param[out] theError  Error Status of the operation
   Standard_EXPORT static Standard_Boolean IsSplitToReverse(const TopoDS_Edge& theSplit,
                                                            const TopoDS_Edge& theShape,
                                                            const Handle(IntTools_Context)& theContext,

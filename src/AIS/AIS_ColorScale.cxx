@@ -293,7 +293,7 @@ Aspect_SequenceOfColor AIS_ColorScale::MakeUniformColors (Standard_Integer theNb
 
   // adjust range to be within (0, 360], with sign according to theHueFrom and theHueTo 
   Standard_Real aHueRange = std::fmod (theHueTo - theHueFrom, 360.);
-  const Standard_Real aHueEps = Precision::Angular() * 180. / M_PI;
+  constexpr Standard_Real aHueEps = Precision::Angular() * 180. / M_PI;
   if (Abs (aHueRange) <= aHueEps)
   {
     aHueRange = (aHueRange < 0 ? -360. : 360.);
@@ -650,7 +650,9 @@ void AIS_ColorScale::drawColorBar (const Handle(Prs3d_Presentation)& thePrs,
     // (thus the halves of first and last intervals have solid color)
     aTriangles = new Graphic3d_ArrayOfTriangles ((aColors.Length() + 1) * 4,     // quads
                                                  (aColors.Length() + 1) * 2 * 3, // quads as triangles
+// clang-format off
                                                  false, true);                   // per-vertex colors
+// clang-format on
     Quantity_Color aColor1 (aColors.Value (1)), aColor2;
     Standard_Integer       aSizeY        = Standard_Integer(aStepY / 2);
     const Standard_Integer anYBottom     = theBarBottom + aSizeY;

@@ -72,7 +72,7 @@ public:
   //! Clears the content of the set.
   Standard_EXPORT virtual void Clear() Standard_OVERRIDE;
   
-  //! Stores the goemetry of <S>.
+  //! Stores the geometry of <S>.
   Standard_EXPORT virtual void AddGeometry (const TopoDS_Shape& S) Standard_OVERRIDE;
   
   //! Dumps the geometry of me on the stream <OS>.
@@ -173,8 +173,10 @@ private:
   TColStd_IndexedMapOfTransient myPolygons2D;
   TColStd_IndexedMapOfTransient myPolygons3D;
   NCollection_IndexedDataMap<Handle(Poly_Triangulation),
+// clang-format off
                              Standard_Boolean> myTriangulations; //!< Contains a boolean flag with information
                                                                  //!  to save normals for triangulation
+// clang-format on
   TColStd_IndexedMapOfTransient myNodes;
   Standard_Boolean myWithTriangles;
   Standard_Boolean myWithNormals;

@@ -59,8 +59,8 @@ public:
   Standard_EXPORT Graphic3d_CullingTool();
 
   //! Retrieves view volume's planes equations and its vertices from projection and world-view matrices.
-  //! @param theCamera [in] camera definition
-  //! @param theModelWorld [in] optional object transformation for computing frustum in object local coordinate system
+  //! @param[in] theCamera  camera definition
+  //! @param[in] theModelWorld  optional object transformation for computing frustum in object local coordinate system
   Standard_EXPORT void SetViewVolume (const Handle(Graphic3d_Camera)& theCamera,
                                       const Graphic3d_Mat4d& theModelWorld = Graphic3d_Mat4d());
 
@@ -81,10 +81,10 @@ public:
   Standard_EXPORT void CacheClipPtsProjections();
 
   //! Checks whether given AABB should be entirely culled or not.
-  //! @param theCtx    [in] culling properties
-  //! @param theMinPnt [in] maximum point of AABB
-  //! @param theMaxPnt [in] minimum point of AABB
-  //! @param theIsInside [out] flag indicating if AABB is fully inside; initial value should be set to TRUE
+  //! @param[in] theCtx     culling properties
+  //! @param[in] theMinPnt  maximum point of AABB
+  //! @param[in] theMaxPnt  minimum point of AABB
+  //! @param[out] theIsInside  flag indicating if AABB is fully inside; initial value should be set to TRUE
   //! @return TRUE if AABB is completely outside of view frustum or culled by size/distance;
   //!         FALSE in case of partial or complete overlap (use theIsInside to distinguish)
   bool IsCulled (const CullingContext& theCtx,
@@ -137,15 +137,15 @@ public:
 public:
 
   //! Calculates signed distance from plane to point.
-  //! @param theNormal [in] the plane's normal.
-  //! @param thePnt    [in]
+  //! @param[in] theNormal  the plane's normal.
+  //! @param[in] thePnt    
   Standard_EXPORT Standard_Real SignedPlanePointDistance (const Graphic3d_Vec4d& theNormal,
                                                           const Graphic3d_Vec4d& thePnt);
 
   //! Detects if AABB overlaps view volume using separating axis theorem (SAT).
-  //! @param theMinPnt   [in] maximum point of AABB
-  //! @param theMaxPnt   [in] minimum point of AABB
-  //! @param theIsInside [out] flag indicating if AABB is fully inside; initial value should be set to TRUE
+  //! @param[in] theMinPnt    maximum point of AABB
+  //! @param[in] theMaxPnt    minimum point of AABB
+  //! @param[out] theIsInside  flag indicating if AABB is fully inside; initial value should be set to TRUE
   //! @return TRUE if AABB is completely outside of view frustum;
   //!         FALSE in case of partial or complete overlap (use theIsInside to distinguish)
   //! @sa SelectMgr_Frustum::hasOverlap()
@@ -217,9 +217,9 @@ public:
   }
 
   //! Returns TRUE if given AABB should be discarded by distance culling criterion.
-  //! @param theMinPnt   [in] maximum point of AABB
-  //! @param theMaxPnt   [in] minimum point of AABB
-  //! @param theIsInside [out] flag indicating if AABB is fully inside; initial value should be set to TRUE
+  //! @param[in] theMinPnt    maximum point of AABB
+  //! @param[in] theMaxPnt    minimum point of AABB
+  //! @param[out] theIsInside  flag indicating if AABB is fully inside; initial value should be set to TRUE
   //! @return TRUE if AABB is completely behind culling distance;
   //!         FALSE in case of partial or complete overlap (use theIsInside to distinguish)
   bool IsTooDistant (const CullingContext&  theCtx,
@@ -296,6 +296,7 @@ protected:
 
   // for caching clip points projections onto viewing area normals once per traverse
   // ORDER: LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR
+// clang-format off
   Standard_Real myMaxClipProjectionPts[PlanesNB]; //!< Max view volume's vertices projections onto its normals
   Standard_Real myMinClipProjectionPts[PlanesNB]; //!< Min view volume's vertices projections onto its normals
 
@@ -303,6 +304,7 @@ protected:
   // ORDER: E0, E1, E2
   Standard_Real myMaxOrthoProjectionPts[3]; //!< Max view volume's vertices projections onto normalized dimensions of AABB
   Standard_Real myMinOrthoProjectionPts[3]; //!< Min view volume's vertices projections onto normalized dimensions of AABB
+// clang-format on
 
   Standard_Boolean myIsProjectionParallel;
 

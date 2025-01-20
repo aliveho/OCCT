@@ -13,7 +13,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <RWStepKinematics_RWActuatedKinPairAndOrderKinPair.hxx>
+#include "RWStepKinematics_RWActuatedKinPairAndOrderKinPair.pxx"
 
 #include <Interface_Check.hxx>
 #include <Interface_EntityIterator.hxx>
@@ -1687,7 +1687,7 @@ void RWStepKinematics_RWActuatedKinPairAndOrderKinPair::WriteStep
 (StepData_StepWriter& theSW,
   const Handle(StepKinematics_ActuatedKinPairAndOrderKinPair)& theEnt) const
 {
-  // --- Instance of plex componant BoundedCurve ---
+  // --- Instance of plex component BoundedCurve ---
 
   theSW.StartEntity("(ACTUATED_KINEMATIC_PAIR");
 

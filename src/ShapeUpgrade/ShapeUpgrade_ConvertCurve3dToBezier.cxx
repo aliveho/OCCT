@@ -52,7 +52,7 @@ void ShapeUpgrade_ConvertCurve3dToBezier::Compute()
 {
   mySegments->Clear();
   mySplitParams->Clear();
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   Standard_Real First =  mySplitValues->Value(1);
   Standard_Real Last = mySplitValues->Value(mySplitValues->Length());
   if(myCurve->IsKind(STANDARD_TYPE(Geom_TrimmedCurve))) {
@@ -116,7 +116,9 @@ void ShapeUpgrade_ConvertCurve3dToBezier::Compute()
     Handle(Geom_BSplineCurve) aBSpline;
     Standard_Real Shift = 0.;
     if(myCurve->IsKind(STANDARD_TYPE(Geom_Conic))) {
+// clang-format off
       Handle(Geom_Curve) tcurve = new Geom_TrimmedCurve(myCurve,First,Last); //protection against parabols ets
+// clang-format on
       GeomConvert_ApproxCurve approx (tcurve, Precision::Approximation(), 
 				      GeomAbs_C1, 100, 6 );
       if ( approx.HasResult() )
@@ -193,7 +195,7 @@ void ShapeUpgrade_ConvertCurve3dToBezier::Compute()
 
 void ShapeUpgrade_ConvertCurve3dToBezier::Build(const Standard_Boolean /*Segment*/)
 {
-  Standard_Real prec = Precision::PConfusion();
+  constexpr Standard_Real prec = Precision::PConfusion();
   Standard_Integer nb = mySplitValues->Length();
   myResultingCurves =  new TColGeom_HArray1OfCurve (1,nb-1);
   Standard_Real prevPar = 0.;

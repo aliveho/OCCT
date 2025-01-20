@@ -2928,7 +2928,7 @@ Handle( Poly_Triangulation ) CalculationOfSphere( double X , double Y , double Z
   Poly_Connect pc (polyTriangulation);
 
   Standard_Integer index[3];
-  Standard_Real Tol = Precision::Confusion();
+  constexpr Standard_Real Tol = Precision::Confusion();
 
   gp_Dir Nor;
   for (i = 1; i <= polyTriangulation->NbNodes(); i++)
@@ -3015,7 +3015,9 @@ static int VDrawSphere (Draw_Interpretor& /*di*/, Standard_Integer argc, const c
   // show statistics
   Standard_Integer aPointsSize      = aNumberPoints * 3 * sizeof(float);  // 3x GLfloat
   Standard_Integer aNormalsSize     = aNumberPoints * 3 * sizeof(float);  // 3x GLfloat
+// clang-format off
   Standard_Integer aColorsSize      = aNumberPoints * 3 * sizeof(float);  // 3x GLfloat without alpha
+// clang-format on
   Standard_Integer aTrianglesSize   = aNumberTriangles * 3 * sizeof(int); // 3x GLint
   Standard_Integer aPolyConnectSize = aNumberPoints * 4 + aNumberTriangles * 6 * 4;
   Standard_Integer aTotalSize       = aPointsSize + aNormalsSize + aColorsSize + aTrianglesSize;

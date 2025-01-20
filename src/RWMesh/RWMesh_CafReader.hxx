@@ -57,6 +57,7 @@ public:
     Handle(XCAFDoc_ColorTool)       ColorTool;
     Handle(XCAFDoc_VisMaterialTool) VisMaterialTool;
     NCollection_DataMap<TopoDS_Shape, TDF_Label, TopTools_ShapeMapHasher> ComponentMap;
+    NCollection_DataMap<TopoDS_Shape, TDF_Label, TopTools_ShapeMapHasher> OriginalShapeMap;
   };
 
 public:
@@ -293,6 +294,7 @@ protected:
   TColStd_IndexedDataMapOfStringString
                             myMetadata;          //!< metadata map
   NCollection_IndexedMap<TCollection_AsciiString>
+// clang-format off
                             myExternalFiles;     //!< the list of complementary files - external references (textures, data, etc.)
   TCollection_AsciiString   myRootPrefix;        //!< root folder for generating root labels names
   TopTools_SequenceOfShape  myRootShapes;        //!< sequence of result root shapes
@@ -302,6 +304,7 @@ protected:
                             myCoordSysConverter; //!< coordinate system converter
   Standard_Boolean          myToFillDoc;         //!< fill document from shape sequence
   Standard_Boolean          myToFillIncomplete;  //!< fill the document with partially retrieved data even if reader has failed with error
+// clang-format on
   Standard_Integer          myMemoryLimitMiB;    //!< memory usage limit
   Standard_Integer          myExtraStatus;       //!< extra status bitmask
 

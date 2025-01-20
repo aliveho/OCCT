@@ -31,7 +31,7 @@ public:
   //! \param theDegreeU    degree along the first parameter (U) of the surface
   //! \param thePeriodicU  identify the surface is periodical along U axis
   //! \param theFlatKnotsU knots of the surface (with repetition) along U axis
-  //! \param theDegreeV    degree alogn the second parameter (V) of the surface
+  //! \param theDegreeV    degree along the second parameter (V) of the surface
   //! \param thePeriodicV  identify the surface is periodical along V axis
   //! \param theFlatKnotsV knots of the surface (with repetition) along V axis
   //! \param theWeights    array of weights of corresponding poles
@@ -112,14 +112,16 @@ private:
   void operator = (const BSplSLib_Cache&);
 
 private:
+// clang-format off
   Standard_Boolean myIsRational;                //!< identifies the rationality of Bezier/B-spline surface
-  BSplCLib_CacheParams myParamsU, myParamsV;    //!< cach parameters by U and V directions
+  BSplCLib_CacheParams myParamsU, myParamsV;    //!< cache parameters by U and V directions
   Handle(TColStd_HArray2OfReal) myPolesWeights; //!< array of poles and weights of calculated cache
                                                 // the array has following structure:
                                                 //       x11 y11 z11 [w11] x12 y12 z12 [w12] ...
                                                 //       x21 y21 z21 [w21] x22 y22 z22 [w22] etc
                                                 // for non-rational surfaces there is no weight;
                                                 // size of array: (max(myDegree)+1) * A*(min(myDegree)+1), where A = 4 or 3
+// clang-format on
 };
 
 DEFINE_STANDARD_HANDLE(BSplSLib_Cache, Standard_Transient)

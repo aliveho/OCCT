@@ -403,7 +403,9 @@ namespace
       case Image_Format_RGB:    return GUID_WICPixelFormat24bppRGB;
       case Image_Format_BGR:    return GUID_WICPixelFormat24bppBGR;
       case Image_Format_Gray:   return GUID_WICPixelFormat8bppGray;
+// clang-format off
       case Image_Format_Alpha:  return GUID_WICPixelFormat8bppGray; // GUID_WICPixelFormat8bppAlpha
+// clang-format on
       case Image_Format_Gray16: return GUID_WICPixelFormat16bppGray;
       case Image_Format_GrayF:  // GUID_WICPixelFormat32bppGrayFloat
       case Image_Format_AlphaF:
@@ -1098,7 +1100,7 @@ bool Image_AlienPixMap::Save (Standard_Byte* theBuffer,
   if (theBuffer != NULL)
   {
     // a memory buffer wrapped by FreeImage is read only (images can be loaded but not be saved)
-    // so we call FreeImage_OpenMemory() with default arguments and just memcpy in requsted buffer.
+    // so we call FreeImage_OpenMemory() with default arguments and just memcpy in requested buffer.
     FIMEMORY* aFiMem = FreeImage_OpenMemory();
     isSaved = (FreeImage_SaveToMemory (anImageFormat, anImageToDump, aFiMem) != FALSE);
     BYTE* aData = NULL;
@@ -1251,6 +1253,7 @@ bool Image_AlienPixMap::Save (Standard_Byte* theBuffer,
   }
   return true;
 #else
+  (void)theLength;
   if (theBuffer != NULL)
   {
     Message::SendFail ("Error: no image library available");
@@ -1450,6 +1453,8 @@ bool Image_AlienPixMap::Save (std::ostream& theStream, const TCollection_AsciiSt
   }
   return true;
 #else
+  (void)theExtension;
+  (void)theStream;
   Message::SendFail ("Error: no image library available");
   return false;
 #endif

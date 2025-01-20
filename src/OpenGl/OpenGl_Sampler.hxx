@@ -130,12 +130,12 @@ protected:
                                             Standard_Integer theValue);
 
   //! Apply sampler parameters.
-  //! @param theCtx     [in] active OpenGL context
-  //! @param theParams  [in] texture parameters to apply
-  //! @param theSampler [in] apply parameters to Texture object (NULL)
+  //! @param[in] theCtx      active OpenGL context
+  //! @param[in] theParams   texture parameters to apply
+  //! @param[in] theSampler  apply parameters to Texture object (NULL)
   //!                        or to specified Sampler object (non-NULL, sampler is not required to be bound)
-  //! @param theTarget  [in] OpenGL texture target
-  //! @param theMaxMipLevel [in] maximum mipmap level defined within the texture
+  //! @param[in] theTarget   OpenGL texture target
+  //! @param[in] theMaxMipLevel  maximum mipmap level defined within the texture
   Standard_EXPORT static void applySamplerParams (const Handle(OpenGl_Context)& theCtx,
                                                   const Handle(Graphic3d_TextureParams)& theParams,
                                                   OpenGl_Sampler* theSampler,
@@ -155,9 +155,11 @@ protected:
 protected:
 
   Handle(Graphic3d_TextureParams) myParams;          //!< texture parameters
+// clang-format off
   unsigned int                    mySamplerRevision; //!< modification counter of parameters related to sampler state
   unsigned int                    mySamplerID;       //!< OpenGL sampler object ID
   bool                            myIsImmutable;     //!< immutable flag preventing further modifications of sampler parameters, FALSE by default
+// clang-format on
 
 };
 

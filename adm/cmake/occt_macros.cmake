@@ -32,6 +32,27 @@ macro (OCCT_CHECK_AND_UNSET_INSTALL_DIR_SUBDIRS)
   OCCT_CHECK_AND_UNSET (INSTALL_DIR_DOC)
 endmacro()
 
+function (FILE_TO_LIST FILE_NAME FILE_CONTENT)
+  set (LOCAL_FILE_CONTENT)
+  if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/${FILE_NAME}")
+    file (STRINGS "${BUILD_PATCH}/${FILE_NAME}" LOCAL_FILE_CONTENT)
+  elseif (EXISTS "${CMAKE_SOURCE_DIR}/${FILE_NAME}")
+    file (STRINGS "${CMAKE_SOURCE_DIR}/${FILE_NAME}" LOCAL_FILE_CONTENT)
+  endif()
+
+  set (${FILE_CONTENT} ${LOCAL_FILE_CONTENT} PARENT_SCOPE)
+endfunction()
+
+function(FIND_FOLDER_OR_FILE FILE_OR_FOLDER_NAME RESULT_PATH)
+  if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/${FILE_OR_FOLDER_NAME}")
+    set (${RESULT_PATH} "${BUILD_PATCH}/${FILE_OR_FOLDER_NAME}" PARENT_SCOPE)
+  elseif (EXISTS "${CMAKE_SOURCE_DIR}/${FILE_OR_FOLDER_NAME}")
+    set (${RESULT_PATH} "${CMAKE_SOURCE_DIR}/${FILE_OR_FOLDER_NAME}" PARENT_SCOPE)
+  else()
+    set (${RESULT_PATH} "" PARENT_SCOPE)
+  endif()
+endfunction()
+
 # COMPILER_BITNESS variable
 macro (OCCT_MAKE_COMPILER_BITNESS)
   math (EXPR COMPILER_BITNESS "32 + 32*(${CMAKE_SIZEOF_VOID_P}/8)")
@@ -152,6 +173,17 @@ function (OCCT_ORIGIN_AND_PATCHED_FILES RELATIVE_PATH SEARCH_TEMPLATE RESULT)
   set (${RESULT} ${FOUND_FILES} PARENT_SCOPE)
 endfunction()
 
+function (FILLUP_PRODUCT_SEARCH_TEMPLATE PRODUCT_NAME COMPILER COMPILER_BITNESS SEARCH_TEMPLATES)
+  list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*${COMPILER}.*${COMPILER_BITNESS}")
+  list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*[0-9.]+.*${COMPILER}.*${COMPILER_BITNESS}")
+  list (APPEND SEARCH_TEMPLATES "^[a-zA-Z]*[0-9]*-${lower_PRODUCT_NAME}[^a-zA-Z]*[0-9.]+.*${COMPILER}.*${COMPILER_BITNESS}")
+  list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*[0-9.]+.*${COMPILER_BITNESS}")
+  list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*.*${COMPILER_BITNESS}")
+  list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*[0-9.]+")
+  list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*")
+  set (SEARCH_TEMPLATES ${SEARCH_TEMPLATES} PARENT_SCOPE)
+endfunction()
+
 function (FIND_PRODUCT_DIR ROOT_DIR PRODUCT_NAME RESULT)
   OCCT_MAKE_COMPILER_SHORT_NAME()
   OCCT_MAKE_COMPILER_BITNESS()
@@ -163,13 +195,11 @@ function (FIND_PRODUCT_DIR ROOT_DIR PRODUCT_NAME RESULT)
   elseif ("${lower_PRODUCT_NAME}" STREQUAL "tbb")
     list (APPEND SEARCH_TEMPLATES "^.*${lower_PRODUCT_NAME}.*")
   else()
-    list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*${COMPILER}.*${COMPILER_BITNESS}")
-    list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*[0-9.]+.*${COMPILER}.*${COMPILER_BITNESS}")
-    list (APPEND SEARCH_TEMPLATES "^[a-zA-Z]*[0-9]*-${lower_PRODUCT_NAME}[^a-zA-Z]*[0-9.]+.*${COMPILER}.*${COMPILER_BITNESS}")
-    list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*[0-9.]+.*${COMPILER_BITNESS}")
-    list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*.*${COMPILER_BITNESS}")
-    list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*[0-9.]+")
-    list (APPEND SEARCH_TEMPLATES "^[^a-zA-Z]*${lower_PRODUCT_NAME}[^a-zA-Z]*")
+    FILLUP_PRODUCT_SEARCH_TEMPLATE(${lower_PRODUCT_NAME} ${COMPILER} ${COMPILER_BITNESS} SEARCH_TEMPLATES)
+    if (WIN32 AND "${COMPILER}" STREQUAL "clang")
+      # for clang on Windows, search for "vc" as well
+      FILLUP_PRODUCT_SEARCH_TEMPLATE(${lower_PRODUCT_NAME} "vc" ${COMPILER_BITNESS} SEARCH_TEMPLATES)
+    endif()
   endif()
 
   SUBDIRECTORY_NAMES ("${ROOT_DIR}" SUBDIR_NAME_LIST)
@@ -225,7 +255,150 @@ macro (OCCT_CONFIGURE_AND_INSTALL BEING_CONGIRUGED_FILE BUILD_NAME INSTALL_NAME 
   install(FILES "${OCCT_BINARY_DIR}/${BUILD_NAME}" DESTINATION  "${DESTINATION_PATH}" RENAME ${INSTALL_NAME})
 endmacro()
 
-macro (COLLECT_AND_INSTALL_OCCT_HEADER_FILES ROOT_TARGET_OCCT_DIR OCCT_BUILD_TOOLKITS OCCT_COLLECT_SOURCE_DIR OCCT_INSTALL_DIR_PREFIX)
+function (EXTRACT_TOOLKIT_PACKAGES RELATIVE_PATH OCCT_TOOLKIT RESULT_PACKAGES)
+  set (OCCT_TOOLKIT_PACKAGES "")
+  get_property(OCCT_TOOLKIT_PACKAGES GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_PACKAGES)
+  if (OCCT_TOOLKIT_PACKAGES)
+    set (${RESULT_PACKAGES} ${OCCT_TOOLKIT_PACKAGES} PARENT_SCOPE)
+    return()
+  endif()
+  FILE_TO_LIST ("${RELATIVE_PATH}/${OCCT_TOOLKIT}/PACKAGES" OCCT_TOOLKIT_PACKAGES)
+  set (${RESULT_PACKAGES} ${OCCT_TOOLKIT_PACKAGES} PARENT_SCOPE)
+  set_property(GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_PACKAGES "${OCCT_TOOLKIT_PACKAGES}")
+endfunction()
+
+function(EXTRACT_TOOLKIT_EXTERNLIB RELATIVE_PATH OCCT_TOOLKIT RESULT_LIBS)
+  set (OCCT_TOOLKIT_LIBS "")
+  get_property(OCCT_TOOLKIT_LIBS GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_LIBS)
+  if (OCCT_TOOLKIT_LIBS)
+    set (${RESULT_LIBS} ${OCCT_TOOLKIT_LIBS} PARENT_SCOPE)
+    return()
+  endif()
+  FILE_TO_LIST ("${RELATIVE_PATH}/${OCCT_TOOLKIT}/EXTERNLIB" OCCT_TOOLKIT_LIBS)
+  set (${RESULT_LIBS} ${OCCT_TOOLKIT_LIBS} PARENT_SCOPE)
+  set_property(GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_LIBS "${OCCT_TOOLKIT_LIBS}")
+endfunction()
+
+function (EXTRACT_PACKAGE_FILES RELATIVE_PATH OCCT_PACKAGE RESULT_FILES RESULT_INCLUDE_FOLDER)
+  # package name is not unique, it can be reuse in tools and src,
+  # use extra parameter as relative path to distinguish between them
+  set (OCCT_PACKAGE_FILES "")
+  get_property(OCCT_PACKAGE_FILES GLOBAL PROPERTY OCCT_PACKAGE_${RELATIVE_PATH}_${OCCT_PACKAGE}_FILES)
+  get_property(OCCT_PACKAGE_INCLUDE_DIR GLOBAL PROPERTY OCCT_PACKAGE_${RELATIVE_PATH}_${OCCT_PACKAGE}_INCLUDE_DIR)
+  if (OCCT_PACKAGE_FILES)
+    set (${RESULT_FILES} ${OCCT_PACKAGE_FILES} PARENT_SCOPE)
+    set (${RESULT_INCLUDE_FOLDER} ${OCCT_PACKAGE_INCLUDE_DIR} PARENT_SCOPE)
+    return()
+  endif()
+
+  if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/${RELATIVE_PATH}/${OCCT_PACKAGE}/FILES")
+    file (STRINGS "${BUILD_PATCH}/${RELATIVE_PATH}/${OCCT_PACKAGE}/FILES" OCCT_PACKAGE_FILES)
+    set (OCCT_PACKAGE_INCLUDE_DIR "${BUILD_PATCH}/${RELATIVE_PATH}/${OCCT_PACKAGE}")
+  elseif (EXISTS "${CMAKE_SOURCE_DIR}/${RELATIVE_PATH}/${OCCT_PACKAGE}/FILES")
+    file (STRINGS "${CMAKE_SOURCE_DIR}/${RELATIVE_PATH}/${OCCT_PACKAGE}/FILES" OCCT_PACKAGE_FILES)
+    set (OCCT_PACKAGE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/${RELATIVE_PATH}/${OCCT_PACKAGE}")
+  endif()
+
+  # collect and searach for the files in the package directory or patached one
+  # FILE contains inly filename that must to be inside package or patched directory
+  set (FILE_PATH_LIST)
+
+  foreach (OCCT_FILE ${OCCT_PACKAGE_FILES})
+    string (REGEX REPLACE "[^:]+:+" "" OCCT_FILE "${OCCT_FILE}")
+    FIND_FOLDER_OR_FILE ("${RELATIVE_PATH}/${OCCT_PACKAGE}/${OCCT_FILE}" CUSTOM_FILE_PATH)
+    if (CUSTOM_FILE_PATH)
+      list (APPEND FILE_PATH_LIST "${CUSTOM_FILE_PATH}")
+    endif()
+  endforeach()
+
+  if (NOT FILE_PATH_LIST)
+    if(BUILD_PATH)
+      message (WARNING "FILES has not been found in ${BUILD_PATCH}/${RELATIVE_PATH}/${OCCT_PACKAGE}")
+    else()
+      message (WARNING "FILES has not been found in ${CMAKE_SOURCE_DIR}/${RELATIVE_PATH}/${OCCT_PACKAGE}")
+    endif()
+  endif()
+
+  set (${RESULT_FILES} ${FILE_PATH_LIST} PARENT_SCOPE)
+  set (${RESULT_INCLUDE_FOLDER} ${OCCT_PACKAGE_INCLUDE_DIR} PARENT_SCOPE)
+  set_property(GLOBAL PROPERTY OCCT_PACKAGE_${RELATIVE_PATH}_${OCCT_PACKAGE}_FILES "${FILE_PATH_LIST}")
+  set_property(GLOBAL PROPERTY OCCT_PACKAGE_${RELATIVE_PATH}_${OCCT_PACKAGE}_INCLUDE_DIR "${OCCT_PACKAGE_INCLUDE_DIR}")
+endfunction()
+
+function(EXCTRACT_TOOLKIT_DEPS RELATIVE_PATH OCCT_TOOLKIT RESULT_TKS_AS_DEPS RESULT_INCLUDE_FOLDERS)
+  set (OCCT_TOOLKIT_DEPS "")
+  set (OCCT_TOOLKIT_INCLUDE_FOLDERS "")
+  get_property(OCCT_TOOLKIT_DEPS GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_DEPS)
+  get_property(OCCT_TOOLKIT_INCLUDE_FOLDERS GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_INCLUDE_FOLDERS)
+  if (OCCT_TOOLKIT_DEPS)
+    set (${RESULT_TKS_AS_DEPS} ${OCCT_TOOLKIT_DEPS} PARENT_SCOPE)
+    set (${RESULT_INCLUDE_FOLDERS} ${OCCT_TOOLKIT_INCLUDE_FOLDERS} PARENT_SCOPE)
+    return()
+  endif()
+  set (EXTERNAL_LIBS)
+  EXTRACT_TOOLKIT_EXTERNLIB (${RELATIVE_PATH} ${OCCT_TOOLKIT} EXTERNAL_LIBS)
+  foreach (EXTERNAL_LIB ${EXTERNAL_LIBS})
+    string (REGEX MATCH "^TK" TK_FOUND ${EXTERNAL_LIB})
+    if (TK_FOUND)
+      list (APPEND OCCT_TOOLKIT_DEPS ${EXTERNAL_LIB})
+    endif()
+  endforeach()
+
+  set (OCCT_TOOLKIT_PACKAGES)
+  EXTRACT_TOOLKIT_PACKAGES (${RELATIVE_PATH} ${OCCT_TOOLKIT} OCCT_TOOLKIT_PACKAGES)
+  foreach(OCCT_PACKAGE ${OCCT_TOOLKIT_PACKAGES})
+    EXTRACT_PACKAGE_FILES (${RELATIVE_PATH} ${OCCT_PACKAGE} OCCT_PACKAGE_FILES OCCT_PACKAGE_INCLUDE_DIR)
+    list (APPEND OCCT_TOOLKIT_INCLUDE_FOLDERS ${OCCT_PACKAGE_INCLUDE_DIR})
+  endforeach()
+
+  set (${RESULT_TKS_AS_DEPS} ${OCCT_TOOLKIT_DEPS} PARENT_SCOPE)
+  set (${RESULT_INCLUDE_FOLDERS} ${OCCT_TOOLKIT_INCLUDE_FOLDERS} PARENT_SCOPE)
+  set_property(GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_DEPS "${OCCT_TOOLKIT_DEPS}")
+  set_property(GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_INCLUDE_FOLDERS "${OCCT_TOOLKIT_INCLUDE_FOLDERS}")
+endfunction()
+
+function(EXCTRACT_TOOLKIT_FULL_DEPS RELATIVE_PATH OCCT_TOOLKIT RESULT_TKS_AS_DEPS RESULT_INCLUDE_FOLDERS)
+  set (OCCT_TOOLKIT_DEPS "")
+  set (OCCT_TOOLKIT_INCLUDE_FOLDERS "")
+  get_property(OCCT_TOOLKIT_DEPS GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_FULL_DEPS)
+  get_property(OCCT_TOOLKIT_INCLUDE_FOLDERS GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_FULL_INCLUDE_FOLDERS)
+  if (OCCT_TOOLKIT_DEPS)
+    set (${RESULT_TKS_AS_DEPS} ${OCCT_TOOLKIT_DEPS} PARENT_SCOPE)
+    set (${RESULT_INCLUDE_FOLDERS} ${OCCT_TOOLKIT_INCLUDE_FOLDERS} PARENT_SCOPE)
+    return()
+  endif()
+
+  EXCTRACT_TOOLKIT_DEPS(${RELATIVE_PATH} ${OCCT_TOOLKIT} OCCT_TOOLKIT_DEPS OCCT_TOOLKIT_INCLUDE_DIR)
+  list(APPEND OCCT_TOOLKIT_FULL_DEPS ${OCCT_TOOLKIT_DEPS})
+  list(APPEND OCCT_TOOLKIT_INCLUDE_FOLDERS ${OCCT_TOOLKIT_INCLUDE_DIR})
+
+  foreach(DEP ${OCCT_TOOLKIT_DEPS})
+    EXCTRACT_TOOLKIT_FULL_DEPS(${RELATIVE_PATH} ${DEP} DEP_TOOLKIT_DEPS DEP_INCLUDE_DIRS)
+    list(APPEND OCCT_TOOLKIT_FULL_DEPS ${DEP_TOOLKIT_DEPS})
+    list(APPEND OCCT_TOOLKIT_INCLUDE_FOLDERS ${DEP_INCLUDE_DIRS})
+  endforeach()
+
+  list(REMOVE_DUPLICATES OCCT_TOOLKIT_FULL_DEPS)
+  list(REMOVE_DUPLICATES OCCT_TOOLKIT_INCLUDE_FOLDERS)
+
+  set (${RESULT_TKS_AS_DEPS} ${OCCT_TOOLKIT_FULL_DEPS} PARENT_SCOPE)
+  set (${RESULT_INCLUDE_FOLDERS} ${OCCT_TOOLKIT_INCLUDE_FOLDERS} PARENT_SCOPE)
+  set_property(GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_FULL_DEPS "${OCCT_TOOLKIT_FULL_DEPS}")
+  set_property(GLOBAL PROPERTY OCCT_TOOLKIT_${OCCT_TOOLKIT}_FULL_INCLUDE_FOLDERS "${OCCT_TOOLKIT_INCLUDE_FOLDERS}")
+endfunction()
+
+function (FILE_TO_LIST FILE_NAME FILE_CONTENT)
+  set (LOCAL_FILE_CONTENT)
+  if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/${FILE_NAME}")
+    file (STRINGS "${BUILD_PATCH}/${FILE_NAME}" LOCAL_FILE_CONTENT)
+  elseif (EXISTS "${CMAKE_SOURCE_DIR}/${FILE_NAME}")
+    file (STRINGS "${CMAKE_SOURCE_DIR}/${FILE_NAME}" LOCAL_FILE_CONTENT)
+  endif()
+
+  set (${FILE_CONTENT} ${LOCAL_FILE_CONTENT} PARENT_SCOPE)
+endfunction()
+
+function (COLLECT_AND_INSTALL_OCCT_HEADER_FILES THE_ROOT_TARGET_OCCT_DIR THE_OCCT_BUILD_TOOLKITS THE_RELATIVE_PATH THE_OCCT_INSTALL_DIR_PREFIX)
   set (OCCT_USED_PACKAGES)
 
   # consider patched header.in template
@@ -234,145 +407,67 @@ macro (COLLECT_AND_INSTALL_OCCT_HEADER_FILES ROOT_TARGET_OCCT_DIR OCCT_BUILD_TOO
     set (TEMPLATE_HEADER_PATH "${BUILD_PATCH}/adm/templates/header.in")
   endif()
 
-  set (ROOT_OCCT_DIR ${CMAKE_SOURCE_DIR})
-
-  foreach (OCCT_USED_TOOLKIT ${OCCT_BUILD_TOOLKITS})
-    # append all required package folders
-    set (OCCT_TOOLKIT_PACKAGES)
-    if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/src/${OCCT_USED_TOOLKIT}/PACKAGES")
-      file (STRINGS "${BUILD_PATCH}/src/${OCCT_USED_TOOLKIT}/PACKAGES" OCCT_TOOLKIT_PACKAGES)
-    elseif (EXISTS "${OCCT_COLLECT_SOURCE_DIR}/${OCCT_USED_TOOLKIT}/PACKAGES")
-      file (STRINGS "${OCCT_COLLECT_SOURCE_DIR}/${OCCT_USED_TOOLKIT}/PACKAGES" OCCT_TOOLKIT_PACKAGES)
-    endif()
-
-    list (APPEND OCCT_USED_PACKAGES ${OCCT_TOOLKIT_PACKAGES})
-  endforeach()
-
-  list (REMOVE_DUPLICATES OCCT_USED_PACKAGES)
-
   set (OCCT_HEADER_FILES_COMPLETE)
-  set (OCCT_HEADER_FILE_NAMES_NOT_IN_FILES)
-  set (OCCT_HEADER_FILE_WITH_PROPER_NAMES)
-
-  string(TIMESTAMP CURRENT_TIME "%H:%M:%S")
-  message (STATUS "Info: \(${CURRENT_TIME}\) Compare FILES with files in package directories...")
-
-  foreach (OCCT_PACKAGE ${OCCT_USED_PACKAGES})
-    if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/src/${OCCT_PACKAGE}/FILES")
-      file (STRINGS "${BUILD_PATCH}/src/${OCCT_PACKAGE}/FILES" OCCT_ALL_FILE_NAMES)
-    elseif (EXISTS "${OCCT_COLLECT_SOURCE_DIR}/${OCCT_PACKAGE}/FILES")
-      file (STRINGS "${OCCT_COLLECT_SOURCE_DIR}/${OCCT_PACKAGE}/FILES" OCCT_ALL_FILE_NAMES)
-    else()
-      message (WARNING "FILES has not been found in ${OCCT_COLLECT_SOURCE_DIR}/${OCCT_PACKAGE}")
-      continue()
-    endif()
-
-    list (LENGTH OCCT_ALL_FILE_NAMES ALL_FILES_NB)
-    math (EXPR ALL_FILES_NB "${ALL_FILES_NB} - 1" )
-
-    # emit warnings if there are unprocessed headers
-    file (GLOB OCCT_ALL_FILES_IN_DIR "${OCCT_COLLECT_SOURCE_DIR}/${OCCT_PACKAGE}/*.*")
-    file (GLOB OCCT_ALL_FILES_IN_PATCH_DIR "${BUILD_PATCH}/src/${OCCT_PACKAGE}/*.*")
-
-    # use patched header files
-    foreach (OCCT_FILE_IN_PATCH_DIR ${OCCT_ALL_FILES_IN_PATCH_DIR})
-      get_filename_component (OCCT_FILE_IN_PATCH_DIR_NAME ${OCCT_FILE_IN_PATCH_DIR} NAME)
-      list (REMOVE_ITEM OCCT_ALL_FILES_IN_DIR "${OCCT_COLLECT_SOURCE_DIR}/${OCCT_PACKAGE}/${OCCT_FILE_IN_PATCH_DIR_NAME}")
-      list (APPEND OCCT_ALL_FILES_IN_DIR "${OCCT_FILE_IN_PATCH_DIR}")
-    endforeach()
-
-    foreach (OCCT_FILE_IN_DIR ${OCCT_ALL_FILES_IN_DIR})
-      get_filename_component (OCCT_FILE_IN_DIR_NAME ${OCCT_FILE_IN_DIR} NAME)
-
-      set (OCCT_FILE_IN_DIR_STATUS OFF)
-
-      if (${ALL_FILES_NB} LESS 0)
-        break()
-      endif()
-
-      foreach (FILE_INDEX RANGE ${ALL_FILES_NB})
-        list (GET OCCT_ALL_FILE_NAMES ${FILE_INDEX} OCCT_FILE_NAME)
-
-        string (REGEX REPLACE "[^:]+:+" "" OCCT_FILE_NAME "${OCCT_FILE_NAME}")
-
-        if ("${OCCT_FILE_IN_DIR_NAME}" STREQUAL "${OCCT_FILE_NAME}")
-          set (OCCT_FILE_IN_DIR_STATUS ON)
-
-          string (REGEX MATCH ".+\\.[hlg]xx|.+\\.h$" IS_HEADER_FOUND "${OCCT_FILE_NAME}")
-          if (IS_HEADER_FOUND)
-            list (APPEND OCCT_HEADER_FILES_COMPLETE ${OCCT_FILE_IN_DIR})
-
-            # collect header files with name that does not contain its package one
-            string (REGEX MATCH "^${OCCT_PACKAGE}[_.]" IS_HEADER_MATHCING_PACKAGE "${OCCT_FILE_NAME}")
-            if (NOT IS_HEADER_MATHCING_PACKAGE)
-              list (APPEND OCCT_HEADER_FILE_WITH_PROPER_NAMES "${OCCT_FILE_NAME}")
-            endif()
-          endif()
-
-          # remove found element from list
-          list (REMOVE_AT OCCT_ALL_FILE_NAMES ${FILE_INDEX})
-          math (EXPR ALL_FILES_NB "${ALL_FILES_NB} - 1" ) # decrement number
-
-          break()
-        endif()
-      endforeach()
-
-      if (NOT OCCT_FILE_IN_DIR_STATUS)
-        message (STATUS "Warning. File ${OCCT_FILE_IN_DIR} is not listed in ${OCCT_COLLECT_SOURCE_DIR}/${OCCT_PACKAGE}/FILES")
-
-        string (REGEX MATCH ".+\\.[hlg]xx|.+\\.h$" IS_HEADER_FOUND "${OCCT_FILE_NAME}")
-        if (IS_HEADER_FOUND)
-          list (APPEND OCCT_HEADER_FILE_NAMES_NOT_IN_FILES ${OCCT_FILE_NAME})
-        endif()
-      endif()
+  foreach(OCCT_TOOLKIT ${THE_OCCT_BUILD_TOOLKITS})
+    # parse PACKAGES file
+    EXTRACT_TOOLKIT_PACKAGES (${THE_RELATIVE_PATH} ${OCCT_TOOLKIT} USED_PACKAGES)
+    foreach(OCCT_PACKAGE ${USED_PACKAGES})
+      EXTRACT_PACKAGE_FILES (${THE_RELATIVE_PATH} ${OCCT_PACKAGE} ALL_FILES _)
+      set (HEADER_FILES_FILTERING ${ALL_FILES})
+      list (FILTER HEADER_FILES_FILTERING INCLUDE REGEX ".+[.](h|g|p|lxx)")
+      list (APPEND OCCT_HEADER_FILES_COMPLETE ${HEADER_FILES_FILTERING})
     endforeach()
   endforeach()
-  
-  # create new file including found header
-  string(TIMESTAMP CURRENT_TIME "%H:%M:%S")
-  message (STATUS "Info: \(${CURRENT_TIME}\) Create header-links in inc folder...")
 
+  # Check that copying is done and match the include installation type.
+  # Check by first file in list.
+  list(GET OCCT_HEADER_FILES_COMPLETE 0 FIRST_OCCT_HEADER_FILE)
+  get_filename_component (FIRST_OCCT_HEADER_FILE ${FIRST_OCCT_HEADER_FILE} NAME)
+  set (TO_FORCE_COPY FALSE)
+  if (NOT EXISTS "${THE_ROOT_TARGET_OCCT_DIR}/${THE_OCCT_INSTALL_DIR_PREFIX}/${FIRST_OCCT_HEADER_FILE}")
+    set (TO_FORCE_COPY TRUE)
+  else()
+    # get content and check the number of lines inside file.
+    # If more then 1 then it is a symlink.
+    file (STRINGS "${THE_ROOT_TARGET_OCCT_DIR}/${THE_OCCT_INSTALL_DIR_PREFIX}/${FIRST_OCCT_HEADER_FILE}" FIRST_OCCT_HEADER_FILE_CONTENT)
+    list (LENGTH FIRST_OCCT_HEADER_FILE_CONTENT FIRST_OCCT_HEADER_FILE_CONTENT_LEN)
+    if (${FIRST_OCCT_HEADER_FILE_CONTENT_LEN} EQUAL 1 AND BUILD_INCLUDE_SYMLINK)
+      set (TO_FORCE_COPY TRUE)
+    elseif(${FIRST_OCCT_HEADER_FILE_CONTENT_LEN} GREATER 1 AND NOT BUILD_INCLUDE_SYMLINK)
+      set (TO_FORCE_COPY TRUE)
+    endif()
+  endif()
+  
   foreach (OCCT_HEADER_FILE ${OCCT_HEADER_FILES_COMPLETE})
     get_filename_component (HEADER_FILE_NAME ${OCCT_HEADER_FILE} NAME)
-    set (OCCT_HEADER_FILE_CONTENT "#include \"${OCCT_HEADER_FILE}\"")
-    configure_file ("${TEMPLATE_HEADER_PATH}" "${ROOT_TARGET_OCCT_DIR}/${OCCT_INSTALL_DIR_PREFIX}/${HEADER_FILE_NAME}" @ONLY)
-  endforeach()
-  
-  install (FILES ${OCCT_HEADER_FILES_COMPLETE} DESTINATION "${INSTALL_DIR}/${OCCT_INSTALL_DIR_PREFIX}")
-  
-  string(TIMESTAMP CURRENT_TIME "%H:%M:%S")
-  message (STATUS "Info: \(${CURRENT_TIME}\) Checking headers in inc folder...")
-    
-  file (GLOB OCCT_HEADER_FILES_OLD "${ROOT_TARGET_OCCT_DIR}/${OCCT_INSTALL_DIR_PREFIX}/*")
-  foreach (OCCT_HEADER_FILE_OLD ${OCCT_HEADER_FILES_OLD})
-    get_filename_component (HEADER_FILE_NAME ${OCCT_HEADER_FILE_OLD} NAME)
-    string (REGEX MATCH "^[a-zA-Z0-9]+" PACKAGE_NAME "${HEADER_FILE_NAME}")
-    
-    list (FIND OCCT_USED_PACKAGES ${PACKAGE_NAME} IS_HEADER_FOUND)
-    if (NOT ${IS_HEADER_FOUND} EQUAL -1)
-      if (NOT EXISTS "${OCCT_COLLECT_SOURCE_DIR}/${PACKAGE_NAME}/${HEADER_FILE_NAME}")
-        message (STATUS "Warning. ${OCCT_HEADER_FILE_OLD} is not present in the sources and will be removed from ${ROOT_TARGET_OCCT_DIR}/inc")
-        file (REMOVE "${OCCT_HEADER_FILE_OLD}")
+    set(TARGET_FILE "${THE_ROOT_TARGET_OCCT_DIR}/${THE_OCCT_INSTALL_DIR_PREFIX}/${HEADER_FILE_NAME}")
+
+    # Check if the file already exists in the target directory
+    if (TO_FORCE_COPY OR NOT EXISTS "${TARGET_FILE}")
+      if (BUILD_INCLUDE_SYMLINK)
+        file (CREATE_LINK "${OCCT_HEADER_FILE}" "${TARGET_FILE}" SYMBOLIC)
       else()
-        list (FIND OCCT_HEADER_FILE_NAMES_NOT_IN_FILES ${PACKAGE_NAME} IS_HEADER_FOUND)
-        if (NOT ${IS_HEADER_FOUND} EQUAL -1)
-          message (STATUS "Warning. ${OCCT_HEADER_FILE_OLD} is present in the sources but not involved in FILES and will be removed from ${ROOT_TARGET_OCCT_DIR}/inc")
-          file (REMOVE "${OCCT_HEADER_FILE_OLD}")
-        endif()
-      endif()
-    else()
-      set (IS_HEADER_FOUND -1)
-      if (NOT "${OCCT_HEADER_FILE_WITH_PROPER_NAMES}" STREQUAL "")
-        list (FIND OCCT_HEADER_FILE_WITH_PROPER_NAMES ${HEADER_FILE_NAME} IS_HEADER_FOUND)
-      endif()
-      
-      if (${IS_HEADER_FOUND} EQUAL -1)
-        message (STATUS "Warning. \(${PACKAGE_NAME}\) ${OCCT_HEADER_FILE_OLD} is not used and will be removed from ${ROOT_TARGET_OCCT_DIR}/inc")
-        file (REMOVE "${OCCT_HEADER_FILE_OLD}")
+        set (OCCT_HEADER_FILE_CONTENT "#include \"${OCCT_HEADER_FILE}\"")
+        configure_file ("${TEMPLATE_HEADER_PATH}" "${TARGET_FILE}" @ONLY)
       endif()
     endif()
   endforeach()
-endmacro()
+
+  set (OCCT_HEADER_FILES_INSTALLATION ${OCCT_HEADER_FILES_COMPLETE})
+  list (FILTER OCCT_HEADER_FILES_INSTALLATION INCLUDE REGEX ".*[.](h|lxx)")
+  install (FILES ${OCCT_HEADER_FILES_INSTALLATION} DESTINATION "${INSTALL_DIR}/${THE_OCCT_INSTALL_DIR_PREFIX}")
+endfunction()
+
+function(ADD_PRECOMPILED_HEADER INPUT_TARGET PRECOMPILED_HEADER THE_IS_PRIVATE)
+  if (NOT BUILD_USE_PCH)
+    return()
+  endif()
+  if (${THE_IS_PRIVATE})
+    target_precompile_headers(${INPUT_TARGET} PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${PRECOMPILED_HEADER}>")
+  else()
+    target_precompile_headers(${INPUT_TARGET} PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${PRECOMPILED_HEADER}>")
+  endif()
+endfunction()
 
 macro (OCCT_COPY_FILE_OR_DIR BEING_COPIED_OBJECT DESTINATION_PATH)
   # first of all, copy original files
@@ -411,11 +506,8 @@ function (OCCT_IS_PRODUCT_REQUIRED CSF_VAR_NAME USE_PRODUCT)
     message(STATUS "Warning: the list of being used toolkits is empty")
   else()
     foreach (USED_TOOLKIT ${BUILD_TOOLKITS})
-      if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/src/${USED_TOOLKIT}/EXTERNLIB")
-        file (READ "${BUILD_PATCH}/src/${USED_TOOLKIT}/EXTERNLIB" FILE_CONTENT)
-      elseif (EXISTS "${CMAKE_SOURCE_DIR}/src/${USED_TOOLKIT}/EXTERNLIB")
-        file (READ "${CMAKE_SOURCE_DIR}/src/${USED_TOOLKIT}/EXTERNLIB" FILE_CONTENT)
-      endif()
+      set (FILE_CONTENT)
+      EXTRACT_TOOLKIT_EXTERNLIB ("src" ${USED_TOOLKIT} FILE_CONTENT)
 
       string (REGEX MATCH "${CSF_VAR_NAME}" DOES_FILE_CONTAIN "${FILE_CONTENT}")
 
@@ -425,17 +517,6 @@ function (OCCT_IS_PRODUCT_REQUIRED CSF_VAR_NAME USE_PRODUCT)
       endif()
     endforeach()
   endif()
-endfunction()
-
-function (FILE_TO_LIST FILE_NAME FILE_CONTENT)
-  set (LOCAL_FILE_CONTENT)
-  if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/${FILE_NAME}")
-    file (STRINGS "${BUILD_PATCH}/${FILE_NAME}" LOCAL_FILE_CONTENT)
-  elseif (EXISTS "${CMAKE_SOURCE_DIR}/${FILE_NAME}")
-    file (STRINGS "${CMAKE_SOURCE_DIR}/${FILE_NAME}" LOCAL_FILE_CONTENT)
-  endif()
-
-  set (${FILE_CONTENT} ${LOCAL_FILE_CONTENT} PARENT_SCOPE)
 endfunction()
 
 # Function to determine if TOOLKIT is OCCT toolkit
@@ -449,58 +530,6 @@ function (IS_OCCT_TOOLKIT TOOLKIT_NAME MODULES IS_TOOLKIT_FOUND)
       set (${IS_TOOLKIT_FOUND} ON PARENT_SCOPE)
     endif()
   endforeach(MODULE)
-endfunction()
-
-# TOOLKIT_DEPS is defined with dependencies from file src/TOOLKIT_NAME/EXTERNLIB.
-# CSF_ variables are ignored
-function (OCCT_TOOLKIT_DEP TOOLKIT_NAME TOOLKIT_DEPS)
-  FILE_TO_LIST ("src/${TOOLKIT_NAME}/EXTERNLIB" FILE_CONTENT)
-
-  #list (APPEND LOCAL_TOOLKIT_DEPS ${TOOLKIT_NAME})
-  set (LOCAL_TOOLKIT_DEPS)
-  foreach (FILE_CONTENT_LINE ${FILE_CONTENT})
-    string (REGEX MATCH "^TK" TK_FOUND ${FILE_CONTENT_LINE})
-    if ("x${FILE_CONTENT_LINE}" STREQUAL "xDRAWEXE" OR NOT "${TK_FOUND}" STREQUAL "")
-      list (APPEND LOCAL_TOOLKIT_DEPS ${FILE_CONTENT_LINE})
-    endif()
-  endforeach()
-
-  set (${TOOLKIT_DEPS} ${LOCAL_TOOLKIT_DEPS} PARENT_SCOPE)
-endfunction()
-
-# TOOLKIT_FULL_DEPS is defined with complete dependencies (all levels)
-function (OCCT_TOOLKIT_FULL_DEP TOOLKIT_NAME TOOLKIT_FULL_DEPS)
-  # first level dependencies are stored in LOCAL_TOOLKIT_FULL_DEPS
-  OCCT_TOOLKIT_DEP (${TOOLKIT_NAME} LOCAL_TOOLKIT_FULL_DEPS)
-
-  list (LENGTH LOCAL_TOOLKIT_FULL_DEPS LIST_LENGTH)
-  set (LIST_INDEX 0)
-  while (LIST_INDEX LESS LIST_LENGTH)
-    list (GET LOCAL_TOOLKIT_FULL_DEPS ${LIST_INDEX} CURRENT_TOOLKIT)
-    OCCT_TOOLKIT_DEP (${CURRENT_TOOLKIT} CURRENT_TOOLKIT_DEPS)
-
-    # append toolkits are not contained
-    foreach (CURRENT_TOOLKIT_DEP ${CURRENT_TOOLKIT_DEPS})
-      set (CURRENT_TOOLKIT_DEP_FOUND OFF)
-      foreach (LOCAL_TOOLKIT_FULL_DEP ${LOCAL_TOOLKIT_FULL_DEPS})
-        if ("${CURRENT_TOOLKIT_DEP}" STREQUAL "${LOCAL_TOOLKIT_FULL_DEP}")
-          set (CURRENT_TOOLKIT_DEP_FOUND ON)
-          break()
-        endif()
-      endforeach()
-      if ("${CURRENT_TOOLKIT_DEP_FOUND}" STREQUAL "OFF")
-        list (APPEND LOCAL_TOOLKIT_FULL_DEPS ${CURRENT_TOOLKIT_DEP})
-      endif()
-    endforeach()
-
-    # increment the list index
-    MATH(EXPR LIST_INDEX "${LIST_INDEX}+1")
-
-    # calculate new length
-    list (LENGTH LOCAL_TOOLKIT_FULL_DEPS LIST_LENGTH)
-  endwhile()
-
-  set (${TOOLKIT_FULL_DEPS} ${LOCAL_TOOLKIT_FULL_DEPS} PARENT_SCOPE)
 endfunction()
 
 # Function to get list of modules/toolkits/samples from file adm/${FILE_NAME}.
@@ -579,6 +608,74 @@ macro (CHECK_PATH_FOR_CONSISTENCY THE_ROOT_PATH_NAME THE_BEING_CHECKED_PATH_NAME
 
 endmacro()
 
+macro (FLEX_AND_BISON_TARGET_APPLY THE_PACKAGE_NAME RELATIVE_SOURCES_DIR)
+  # Generate Flex and Bison files
+  if (NOT ${BUILD_YACCLEX})
+    return()
+  endif()
+  # flex files
+  OCCT_ORIGIN_AND_PATCHED_FILES ("${RELATIVE_SOURCES_DIR}/${THE_PACKAGE_NAME}" "*[.]lex" SOURCE_FILES_FLEX)
+  list (LENGTH SOURCE_FILES_FLEX SOURCE_FILES_FLEX_LEN)
+  # bison files
+  OCCT_ORIGIN_AND_PATCHED_FILES ("${RELATIVE_SOURCES_DIR}/${THE_PACKAGE_NAME}" "*[.]yacc" SOURCE_FILES_BISON)
+  list (LENGTH SOURCE_FILES_BISON SOURCE_FILES_BISON_LEN)
+  if (NOT (${SOURCE_FILES_FLEX_LEN} EQUAL ${SOURCE_FILES_BISON_LEN} AND NOT ${SOURCE_FILES_FLEX_LEN} EQUAL 0))
+    message(FATAL_ERROR "Error: number of FLEX and BISON files is not equal for ${THE_PACKAGE_NAME}")
+  endif()
+  list (SORT SOURCE_FILES_FLEX)
+  list (SORT SOURCE_FILES_BISON)
+  math (EXPR SOURCE_FILES_FLEX_LEN "${SOURCE_FILES_FLEX_LEN} - 1")
+  foreach (FLEX_FILE_INDEX RANGE ${SOURCE_FILES_FLEX_LEN})
+    list (GET SOURCE_FILES_FLEX ${FLEX_FILE_INDEX} CURRENT_FLEX_FILE)
+    get_filename_component (CURRENT_FLEX_FILE_NAME ${CURRENT_FLEX_FILE} NAME_WE)
+    list (GET SOURCE_FILES_BISON ${FLEX_FILE_INDEX} CURRENT_BISON_FILE)
+    get_filename_component (CURRENT_BISON_FILE_NAME ${CURRENT_BISON_FILE} NAME_WE)
+    string (COMPARE EQUAL ${CURRENT_FLEX_FILE_NAME} ${CURRENT_BISON_FILE_NAME} ARE_FILES_EQUAL)
+    if (NOT (EXISTS "${CURRENT_FLEX_FILE}" AND EXISTS "${CURRENT_BISON_FILE}" AND ${ARE_FILES_EQUAL}))
+      continue()
+    endif()
+    # Note: files are generated in original source directory (not in patch!)
+    set (FLEX_BISON_TARGET_DIR "${CMAKE_SOURCE_DIR}/${RELATIVE_SOURCES_DIR}/${THE_PACKAGE_NAME}")
+    # choose appropriate extension for generated files: "cxx" if source file contains
+    # instruction to generate C++ code, "c" otherwise
+    set (BISON_OUTPUT_FILE_EXT "c")
+    set (FLEX_OUTPUT_FILE_EXT "c")
+    file (STRINGS "${CURRENT_BISON_FILE}" FILE_BISON_CONTENT)
+    foreach (FILE_BISON_CONTENT_LINE ${FILE_BISON_CONTENT})
+      string (REGEX MATCH "%language \"C\\+\\+\"" CXX_BISON_LANGUAGE_FOUND ${FILE_BISON_CONTENT_LINE})
+      if (CXX_BISON_LANGUAGE_FOUND)
+        set (BISON_OUTPUT_FILE_EXT "cxx")
+      endif()
+    endforeach()
+    file (STRINGS "${CURRENT_FLEX_FILE}" FILE_FLEX_CONTENT)
+    foreach (FILE_FLEX_CONTENT_LINE ${FILE_FLEX_CONTENT})
+      string (REGEX MATCH "%option c\\+\\+" CXX_FLEX_LANGUAGE_FOUND ${FILE_FLEX_CONTENT_LINE})
+      if (CXX_FLEX_LANGUAGE_FOUND)
+        set (FLEX_OUTPUT_FILE_EXT "cxx")
+      endif()
+    endforeach()
+    set (BISON_OUTPUT_FILE ${CURRENT_BISON_FILE_NAME}.tab.${BISON_OUTPUT_FILE_EXT})
+    set (FLEX_OUTPUT_FILE lex.${CURRENT_FLEX_FILE_NAME}.${FLEX_OUTPUT_FILE_EXT})
+    if (EXISTS ${FLEX_BISON_TARGET_DIR}/${CURRENT_BISON_FILE_NAME}.tab.${BISON_OUTPUT_FILE_EXT})
+      message (STATUS "Info: remove old output BISON file: ${FLEX_BISON_TARGET_DIR}/${CURRENT_BISON_FILE_NAME}.tab.${BISON_OUTPUT_FILE_EXT}")
+      file(REMOVE ${FLEX_BISON_TARGET_DIR}/${CURRENT_BISON_FILE_NAME}.tab.${BISON_OUTPUT_FILE_EXT})
+    endif()
+    if (EXISTS ${FLEX_BISON_TARGET_DIR}/${CURRENT_BISON_FILE_NAME}.tab.hxx)
+      message (STATUS "Info: remove old output BISON file: ${FLEX_BISON_TARGET_DIR}/${CURRENT_BISON_FILE_NAME}.tab.hxx")
+      file(REMOVE ${FLEX_BISON_TARGET_DIR}/${CURRENT_BISON_FILE_NAME}.tab.hxx)
+    endif()
+    if (EXISTS ${FLEX_BISON_TARGET_DIR}/${FLEX_OUTPUT_FILE})
+      message (STATUS "Info: remove old output FLEX file: ${FLEX_BISON_TARGET_DIR}/${FLEX_OUTPUT_FILE}")
+      file(REMOVE ${FLEX_BISON_TARGET_DIR}/${FLEX_OUTPUT_FILE})
+    endif()
+    BISON_TARGET (Parser_${CURRENT_BISON_FILE_NAME} ${CURRENT_BISON_FILE} "${FLEX_BISON_TARGET_DIR}/${BISON_OUTPUT_FILE}"
+                  COMPILE_FLAGS "-p ${CURRENT_BISON_FILE_NAME} -l -M ${CMAKE_SOURCE_DIR}/${RELATIVE_SOURCES_DIR}/=")
+    FLEX_TARGET  (Scanner_${CURRENT_FLEX_FILE_NAME} ${CURRENT_FLEX_FILE} "${FLEX_BISON_TARGET_DIR}/${FLEX_OUTPUT_FILE}"
+                  COMPILE_FLAGS "-P${CURRENT_FLEX_FILE_NAME} -L")
+    ADD_FLEX_BISON_DEPENDENCY (Scanner_${CURRENT_FLEX_FILE_NAME} Parser_${CURRENT_BISON_FILE_NAME})
+  endforeach()
+endmacro()
+
 # Adds OCCT_INSTALL_BIN_LETTER variable ("" for Release, "d" for Debug and 
 # "i" for RelWithDebInfo) in OpenCASCADETargets-*.cmake files during 
 # installation process.
@@ -630,5 +727,128 @@ macro (OCCT_CREATE_SYMLINK_TO_FILE LIBRARY_NAME LINK_NAME)
         execute_process (COMMAND ln -s \"${LIBRARY_NAME}\" \"${LINK_NAME}\")
       endif()
     ")
+  endif()
+endmacro()
+
+# Function to process CSF libraries and append their file names to a specified list.
+# Additionally, handle library directories for different build configurations.
+# Arguments:
+#   CURRENT_CSF - The current CSF libraries to process.
+#   LIST_NAME - The name of the list to append the processed library file names to.
+#   TARGET_NAME - The target to which the library directories will be added.
+function (PROCESS_CSF_LIBRARIES CURRENT_CSF LIST_NAME TARGET_NAME)
+  separate_arguments (CURRENT_CSF)
+
+  # Local variables to collect found libraries and directories
+  set(FOUND_LIBS "")
+  set(FOUND_DEBUG_DIRS "")
+  set(FOUND_RELEASE_DIRS "")
+
+  # Check if the result is already cached
+  string(REPLACE ";" "_" CACHE_KEY "${CURRENT_CSF}")
+  get_property(CACHED_LIBS GLOBAL PROPERTY "CACHED_LIBS_${CACHE_KEY}" SET)
+  get_property(CACHED_DEBUG_DIRS GLOBAL PROPERTY "CACHED_DEBUG_DIRS_${CACHE_KEY}" SET)
+  get_property(CACHED_RELEASE_DIRS GLOBAL PROPERTY "CACHED_RELEASE_DIRS_${CACHE_KEY}" SET)
+  if (CACHED_LIBS AND NOT "${CACHED_LIBS}" STREQUAL "1")
+    list (APPEND FOUND_LIBS ${CACHED_LIBS})
+    if (CACHED_DEBUG_DIRS)
+      list (APPEND FOUND_DEBUG_DIRS ${CACHED_DEBUG_DIRS})
+    endif()
+    if (CACHED_RELEASE_DIRS)
+      list (APPEND FOUND_RELEASE_DIRS ${CACHED_RELEASE_DIRS})
+    endif()
+  else()
+    foreach (CSF_LIBRARY ${CURRENT_CSF})
+      set (LIBRARY_FROM_CACHE 0)
+      set (CSF_LIBRARY_ORIGINAL ${CSF_LIBRARY})
+      string (TOLOWER "${CSF_LIBRARY}" CSF_LIBRARY)
+      string (REPLACE "+" "[+]" CSF_LIBRARY "${CSF_LIBRARY}")
+      string (REPLACE "." "" CSF_LIBRARY "${CSF_LIBRARY}")
+      get_cmake_property(ALL_CACHE_VARIABLES CACHE_VARIABLES)
+      string (REGEX MATCHALL "(^|;)3RDPARTY_[^;]+_LIBRARY[^;]*" ALL_CACHE_VARIABLES "${ALL_CACHE_VARIABLES}")
+      set (DEBUG_DIR "")
+      set (RELEASE_DIR "")
+      foreach (CACHE_VARIABLE ${ALL_CACHE_VARIABLES})
+        set (CURRENT_CACHE_LIBRARY ${${CACHE_VARIABLE}})
+        string (TOLOWER "${CACHE_VARIABLE}" CACHE_VARIABLE)
+        if (NOT EXISTS "${CURRENT_CACHE_LIBRARY}" OR IS_DIRECTORY "${CURRENT_CACHE_LIBRARY}")
+          continue()
+        endif()
+        string (REGEX MATCH "_${CSF_LIBRARY}$" IS_ENDING "${CACHE_VARIABLE}")
+        string (REGEX MATCH "^([a-z]+)" CSF_WO_VERSION "${CSF_LIBRARY}")
+        string (REGEX MATCH "_${CSF_WO_VERSION}$" IS_ENDING_WO_VERSION "${CACHE_VARIABLE}")
+
+        if ("3rdparty_${CSF_LIBRARY}_library" STREQUAL "${CACHE_VARIABLE}" OR
+            "3rdparty_${CSF_WO_VERSION}_library" STREQUAL "${CACHE_VARIABLE}" OR
+            NOT "x${IS_ENDING}" STREQUAL "x" OR
+            NOT "x${IS_ENDING_WO_VERSION}" STREQUAL "x")
+          get_filename_component(LIBRARY_NAME "${CURRENT_CACHE_LIBRARY}" NAME)
+          list (APPEND FOUND_LIBS "${LIBRARY_NAME}")
+          get_filename_component(LIBRARY_DIR "${CURRENT_CACHE_LIBRARY}" DIRECTORY)
+          set (RELEASE_DIR "${LIBRARY_DIR}")
+          set (LIBRARY_FROM_CACHE 1)
+        elseif ("3rdparty_${CSF_LIBRARY}_library_debug" STREQUAL "${CACHE_VARIABLE}" OR
+                "3rdparty_${CSF_LIBRARY}_debug_library" STREQUAL "${CACHE_VARIABLE}")
+          get_filename_component(LIBRARY_NAME "${CURRENT_CACHE_LIBRARY}" NAME)
+          list (APPEND FOUND_LIBS "${LIBRARY_NAME}")
+          get_filename_component(LIBRARY_DIR "${CURRENT_CACHE_LIBRARY}" DIRECTORY)
+          set (DEBUG_DIR "${LIBRARY_DIR}")
+          set (LIBRARY_FROM_CACHE 1)
+        endif()
+
+        if (DEBUG_DIR AND RELEASE_DIR)
+          break()
+        endif()
+      endforeach()
+      if (NOT ${LIBRARY_FROM_CACHE} AND NOT "${CSF_LIBRARY}" STREQUAL "")
+        list (APPEND FOUND_LIBS "${CSF_LIBRARY_ORIGINAL}")
+        continue()
+      endif()
+      if (DEBUG_DIR AND RELEASE_DIR)
+        list (APPEND FOUND_DEBUG_DIRS "${DEBUG_DIR}")
+        list (APPEND FOUND_RELEASE_DIRS "${RELEASE_DIR}")
+      elseif (DEBUG_DIR)
+        list (APPEND FOUND_DEBUG_DIRS "${DEBUG_DIR}")
+        list (APPEND FOUND_RELEASE_DIRS "${DEBUG_DIR}")
+        message (WARNING "Debug directory found but no release directory found. Using debug directory for both configurations.")
+      elseif (RELEASE_DIR)
+        list (APPEND FOUND_DEBUG_DIRS "${RELEASE_DIR}")
+        list (APPEND FOUND_RELEASE_DIRS "${RELEASE_DIR}")
+      endif()
+    endforeach()
+
+    # Cache the result
+    set_property(GLOBAL PROPERTY "CACHED_LIBS_${CACHE_KEY}" "${FOUND_LIBS}")
+    set_property(GLOBAL PROPERTY "CACHED_DEBUG_DIRS_${CACHE_KEY}" "${FOUND_DEBUG_DIRS}")
+    set_property(GLOBAL PROPERTY "CACHED_RELEASE_DIRS_${CACHE_KEY}" "${FOUND_RELEASE_DIRS}")
+  endif()
+
+  # Append found values to the external variable
+  list(APPEND ${LIST_NAME} ${FOUND_LIBS})
+  set(${LIST_NAME} "${${LIST_NAME}}" PARENT_SCOPE)
+
+  # Handle library directories for different build configurations
+  list (REMOVE_DUPLICATES FOUND_RELEASE_DIRS)
+  list (REMOVE_DUPLICATES FOUND_DEBUG_DIRS)
+
+  foreach (RELEASE_DIR ${FOUND_RELEASE_DIRS})
+    get_filename_component(RELEASE_DIR_ABS "${RELEASE_DIR}" ABSOLUTE)
+    target_link_directories(${TARGET_NAME} PUBLIC "$<$<CONFIG:RELEASE>:${RELEASE_DIR_ABS}>;$<$<CONFIG:RELWITHDEBINFO>:${RELEASE_DIR_ABS}>")
+  endforeach()
+
+  foreach (DEBUG_DIR ${FOUND_DEBUG_DIRS})
+    get_filename_component(DEBUG_DIR_ABS "${DEBUG_DIR}" ABSOLUTE)
+    target_link_directories(${TARGET_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${DEBUG_DIR_ABS}>")
+  endforeach()
+endfunction()
+macro(OCCT_ADD_VCPKG_FEATURE THE_FEATURE)
+  if (BUILD_USE_VCPKG)
+    list(APPEND VCPKG_MANIFEST_FEATURES "${THE_FEATURE}" PARENT_SCOPE)
+  endif()
+endmacro()
+
+macro (OCCT_UNSET_VCPKG_FEATURE THE_FEATURE)
+  if (BUILD_USE_VCPKG)
+    list (REMOVE_ITEM VCPKG_MANIFEST_FEATURES "${THE_FEATURE}" PARENT_SCOPE)
   endif()
 endmacro()

@@ -140,7 +140,7 @@ protected: //! @name clipping state modification commands
                             const Standard_Integer theStartIndex);
 
   //! Remove the passed set of clipping planes from the context state.
-  //! @param thePlanes [in] the planes to remove from list.
+  //! @param[in] thePlanes  the planes to remove from list.
   Standard_EXPORT void remove (const Handle(Graphic3d_SequenceOfHClipPlane)& thePlanes,
                                const Standard_Integer theStartIndex);
 
@@ -150,6 +150,7 @@ private:
   Handle(Graphic3d_SequenceOfHClipPlane)   myPlanesLocal;    //!< object clipping planes
   NCollection_Vector<Standard_Boolean>     myDisabledPlanes; //!< ids of disabled planes
 
+// clang-format off
   Handle(Graphic3d_ClipPlane)              myCappedChain;    //!< chain which is either temporary disabled or the only one enabled for Capping algorithm
   Standard_Integer                         myCappedSubPlane; //!< sub-plane index within filtered chain; positive number for DisableAllExcept and negative for EnableAllExcept
 
@@ -157,6 +158,7 @@ private:
   Standard_Integer                         myNbCapping;      //!< number of enabled capping  planes
   Standard_Integer                         myNbChains;       //!< number of enabled chains
   Standard_Integer                         myNbDisabled;     //!< number of defined but disabled planes
+// clang-format on
 
 private:
   //! Copying allowed only within Handles

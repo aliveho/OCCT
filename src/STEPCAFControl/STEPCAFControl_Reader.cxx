@@ -375,7 +375,7 @@ IFSelect_ReturnStatus STEPCAFControl_Reader::ReadFile (const Standard_CString th
 //purpose  :
 //=======================================================================
 IFSelect_ReturnStatus STEPCAFControl_Reader::ReadFile (const Standard_CString theFileName,
-                                                       const StepData_ConfParameters& theParams)
+                                                       const DESTEP_Parameters& theParams)
 {
   return myReader.ReadFile(theFileName, theParams);
 }
@@ -450,7 +450,7 @@ Standard_Boolean STEPCAFControl_Reader::Perform (const Standard_CString filename
 //=======================================================================
 Standard_Boolean STEPCAFControl_Reader::Perform (const Standard_CString filename,
                                                  const Handle(TDocStd_Document)& doc,
-                                                 const StepData_ConfParameters& theParams,
+                                                 const DESTEP_Parameters& theParams,
                                                  const Message_ProgressRange& theProgress)
 {
   if (ReadFile(filename, theParams) != IFSelect_RetDone)
@@ -482,7 +482,7 @@ Standard_Boolean STEPCAFControl_Reader::Perform (const TCollection_AsciiString &
 //=======================================================================
 Standard_Boolean STEPCAFControl_Reader::Perform (const TCollection_AsciiString& filename,
                                                  const Handle(TDocStd_Document)& doc,
-                                                 const StepData_ConfParameters& theParams,
+                                                 const DESTEP_Parameters& theParams,
                                                  const Message_ProgressRange& theProgress)
 {
   if (ReadFile(filename.ToCString(), theParams) != IFSelect_RetDone)
@@ -1303,7 +1303,7 @@ static Standard_Boolean IsOverriden(const Interface_Graph& theGraph,
         return Standard_True;
       }
       // for root style returns true only if it is overridden by other root style
-      const Handle(Standard_Transient)& anItem = anOverRidingStyle->ItemAP242().Value();
+      const Handle(Standard_Transient) anItem = anOverRidingStyle->ItemAP242().Value();
       if(!anItem.IsNull() && anItem->IsKind(STANDARD_TYPE(StepShape_ShapeRepresentation)))
       {
         return Standard_True;

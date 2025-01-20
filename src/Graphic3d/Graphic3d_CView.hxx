@@ -112,6 +112,18 @@ public:
   //! Sets visualization type of the view.
   void SetVisualizationType (const Graphic3d_TypeOfVisualization theType) { myVisualization = theType; }
 
+  //! Returns ZLayerId target
+  Graphic3d_ZLayerId ZLayerTarget() const { return myZLayerTarget; }
+
+  //! Sets ZLayerId target.
+  void SetZLayerTarget (const Graphic3d_ZLayerId theTarget) { myZLayerTarget = theTarget; }
+
+  //! Returns ZLayerId redraw mode
+  Standard_Boolean ZLayerRedrawMode() const { return myZLayerRedrawMode; }
+
+  //! Sets ZLayerId redraw mode.
+  void SetZLayerRedrawMode (const Standard_Boolean theMode) { myZLayerRedrawMode = theMode; }
+
   //! Switches computed HLR mode in the view
   Standard_EXPORT void SetComputedMode (const Standard_Boolean theMode);
 
@@ -258,21 +270,26 @@ public:
   //! Dump active rendering buffer into specified memory buffer.
   virtual Standard_Boolean BufferDump (Image_PixMap& theImage, const Graphic3d_BufferType& theBufferType) = 0;
 
+  //! Dumps the graphical contents of a shadowmap framebuffer into an image.
+  //! @param theImage the image to store the shadow map.
+  //! @param[in] theLightName  name of the light used to generate the shadow map.
+  virtual Standard_Boolean ShadowMapDump (Image_PixMap& theImage, const TCollection_AsciiString& theLightName) = 0;
+
   //! Marks BVH tree and the set of BVH primitives of correspondent priority list with id theLayerId as outdated.
   virtual void InvalidateBVHData (const Graphic3d_ZLayerId theLayerId) = 0;
 
   //! Add a layer to the view.
-  //! @param theNewLayerId [in] id of new layer, should be > 0 (negative values are reserved for default layers).
-  //! @param theSettings   [in] new layer settings
-  //! @param theLayerAfter [in] id of layer to append new layer before
+  //! @param[in] theNewLayerId  id of new layer, should be > 0 (negative values are reserved for default layers).
+  //! @param[in] theSettings    new layer settings
+  //! @param[in] theLayerAfter  id of layer to append new layer before
   virtual void InsertLayerBefore (const Graphic3d_ZLayerId theNewLayerId,
                                   const Graphic3d_ZLayerSettings& theSettings,
                                   const Graphic3d_ZLayerId theLayerAfter) = 0;
 
   //! Add a layer to the view.
-  //! @param theNewLayerId  [in] id of new layer, should be > 0 (negative values are reserved for default layers).
-  //! @param theSettings    [in] new layer settings
-  //! @param theLayerBefore [in] id of layer to append new layer after
+  //! @param[in] theNewLayerId   id of new layer, should be > 0 (negative values are reserved for default layers).
+  //! @param[in] theSettings     new layer settings
+  //! @param[in] theLayerBefore  id of layer to append new layer after
   virtual void InsertLayerAfter (const Graphic3d_ZLayerId theNewLayerId,
                                  const Graphic3d_ZLayerSettings& theSettings,
                                  const Graphic3d_ZLayerId theLayerBefore) = 0;
@@ -366,9 +383,9 @@ public:
   const Handle(Graphic3d_CubeMap)& IBLCubeMap() const { return myCubeMapIBL; }
 
   //! Sets image texture or environment cubemap as background.
-  //! @param theTextureMap [in] source to set a background;
+  //! @param[in] theTextureMap  source to set a background;
   //!                           should be either Graphic3d_Texture2D or Graphic3d_CubeMap
-  //! @param theToUpdatePBREnv [in] defines whether IBL maps will be generated or not
+  //! @param[in] theToUpdatePBREnv  defines whether IBL maps will be generated or not
   //!                               (see GeneratePBREnvironment())
   virtual void SetBackgroundImage (const Handle(Graphic3d_TextureMap)& theTextureMap,
                                    Standard_Boolean theToUpdatePBREnv = Standard_True) = 0;
@@ -480,7 +497,7 @@ public:
   void SetBaseXRCamera (const Handle(Graphic3d_Camera)& theCamera) { myBaseXRCamera = theCamera; }
 
   //! Convert XR pose to world space.
-  //! @param thePoseXR [in] transformation defined in VR local coordinate system,
+  //! @param[in] thePoseXR  transformation defined in VR local coordinate system,
   //!                       oriented as Y-up, X-right and -Z-forward
   //! @return transformation defining orientation of XR pose in world space
   gp_Trsf PoseXRToWorld (const gp_Trsf& thePoseXR) const
@@ -494,7 +511,7 @@ public:
   }
 
   //! Returns view direction in the world space based on XR pose.
-  //! @param thePoseXR [in] transformation defined in VR local coordinate system,
+  //! @param[in] thePoseXR  transformation defined in VR local coordinate system,
   //!                       oriented as Y-up, X-right and -Z-forward
   gp_Ax1 ViewAxisInWorld (const gp_Trsf& thePoseXR) const
   {
@@ -531,8 +548,8 @@ public: //! @name obsolete Graduated Trihedron functionality
   virtual void GraduatedTrihedronErase() {}
 
   //! Sets minimum and maximum points of scene bounding box for Graduated Trihedron stored in graphic view object.
-  //! @param theMin [in] the minimum point of scene.
-  //! @param theMax [in] the maximum point of scene.
+  //! @param[in] theMin  the minimum point of scene.
+  //! @param[in] theMax  the maximum point of scene.
   virtual void GraduatedTrihedronMinMaxValues (const Graphic3d_Vec3 theMin, const Graphic3d_Vec3 theMax)
   {
     (void )theMin;
@@ -630,23 +647,30 @@ protected:
 
   NCollection_Sequence<Handle(Graphic3d_CView)> mySubviews; //!< list of child views
   Graphic3d_CView*              myParentView;               //!< back-pointer to the parent view
+// clang-format off
   Standard_Boolean              myIsSubviewComposer;        //!< flag to skip rendering of viewer contents
   Aspect_TypeOfTriedronPosition mySubviewCorner;            //!< position within parent view
   Graphic3d_Vec2i               mySubviewTopLeft;           //!< subview top-left position relative to parent view
   Graphic3d_Vec2i               mySubviewMargins;           //!< subview margins in pixels
   Graphic3d_Vec2d               mySubviewSize;              //!< subview size
   Graphic3d_Vec2d               mySubviewOffset;            //!< subview corner offset within parent view
+// clang-format on
 
   Handle(Graphic3d_StructureManager) myStructureManager;
-  Handle(Graphic3d_Camera)  myCamera;
-  Graphic3d_SequenceOfStructure myStructsToCompute;
-  Graphic3d_SequenceOfStructure myStructsComputed;
-  Graphic3d_MapOfStructure myStructsDisplayed;
-  Standard_Boolean myIsInComputedMode;
-  Standard_Boolean myIsActive;
-  Standard_Boolean myIsRemoved;
-  Graphic3d_TypeOfBackfacingModel myBackfacing;
-  Graphic3d_TypeOfVisualization myVisualization;
+  Handle(Graphic3d_Camera)           myCamera;
+  Graphic3d_SequenceOfStructure      myStructsToCompute;
+  Graphic3d_SequenceOfStructure      myStructsComputed;
+  Graphic3d_MapOfStructure           myStructsDisplayed;
+  Standard_Boolean                   myIsInComputedMode;
+  Standard_Boolean                   myIsActive;
+  Standard_Boolean                   myIsRemoved;
+  Graphic3d_TypeOfBackfacingModel    myBackfacing;
+  Graphic3d_TypeOfVisualization      myVisualization;
+
+// clang-format off
+  Graphic3d_ZLayerId      myZLayerTarget;      //!< ZLayerId for redrawing the content of specific zlayers.
+  Standard_Boolean        myZLayerRedrawMode;  //!< If true redraws single layer, otherwise redraws group of layers.
+// clang-format on
 
   Quantity_ColorRGBA           myBgColor;
   Handle(Graphic3d_TextureMap) myBackgroundImage;
@@ -659,11 +683,13 @@ protected:
   Standard_Boolean             myToUpdateSkydome;
 
   Handle(Aspect_XRSession) myXRSession;
+// clang-format off
   Handle(Graphic3d_Camera) myBackXRCamera;       //!< camera projection parameters to restore after closing XR session (FOV, aspect and similar)
   Handle(Graphic3d_Camera) myBaseXRCamera;       //!< neutral camera orientation defining coordinate system in which head tracking is defined
   Handle(Graphic3d_Camera) myPosedXRCamera;      //!< transient XR camera orientation with tracked head orientation applied (based on myBaseXRCamera)
   Handle(Graphic3d_Camera) myPosedXRCameraCopy;  //!< neutral camera orientation copy at the beginning of processing input
   Standard_Real            myUnitFactor;         //!< unit scale factor defined as scale factor for m (meters)
+// clang-format on
 
 };
 

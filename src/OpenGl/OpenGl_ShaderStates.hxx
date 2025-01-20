@@ -157,7 +157,9 @@ public:
 private:
 
   Handle(Graphic3d_LightSet) myLightSources;     //!< List of OCCT light sources
+// clang-format off
   Standard_Integer           mySpecIBLMapLevels; //!< Number of mipmap levels used in specular IBL map (0 by default or in case of using non-PBR shading model)
+// clang-format on
   Handle(OpenGl_ShadowMapArray) myShadowMaps;    //!< active shadowmap
   Standard_Boolean           myToCastShadows;    //!< enable/disable shadowmap
 
@@ -197,9 +199,9 @@ public:
   OpenGl_OitState() : myOitMode (Graphic3d_RTM_BLEND_UNORDERED), myDepthFactor (0.5f) {}
 
   //! Sets the uniform values.
-  //! @param theToEnableWrite [in] flag indicating whether color and coverage
+  //! @param[in] theToEnableWrite  flag indicating whether color and coverage
   //!  values for OIT processing should be written by shader program.
-  //! @param theDepthFactor [in] scalar factor [0-1] defining influence of depth
+  //! @param[in] theDepthFactor  scalar factor [0-1] defining influence of depth
   //!  component of a fragment to its final coverage coefficient.
   void Set (Graphic3d_RenderTransparentMethod theMode,
             const float theDepthFactor)
@@ -218,7 +220,9 @@ public:
 
 private:
 
+// clang-format off
   Graphic3d_RenderTransparentMethod myOitMode;     //!< active OIT method for the main GLSL program
+// clang-format on
   float                             myDepthFactor; //!< factor of depth influence to coverage
 };
 

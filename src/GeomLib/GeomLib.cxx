@@ -539,9 +539,6 @@ void GeomLib::EvalMaxDistanceAlongParameter(const Adaptor3d_Curve& ACurve,
     local_distance_squared =
       Point1.SquareDistance (Point2) ;
     
-    local_distance_squared =
-      Point1.SquareDistance (Point2) ;
-    
     
     if (local_distance_squared > tolerance_squared) {
       
@@ -1479,7 +1476,7 @@ void GeomLib::ExtendSurfByLength(Handle(Geom_BoundedSurface)& Surface,
     Handle(Geom_BSplineSurface)::DownCast (Surface);
   if (BS.IsNull()) {
     //BS = GeomConvert::SurfaceToBSplineSurface(Surface);
-    Standard_Real Tol = Precision::Confusion(); //1.e-4;
+    constexpr Standard_Real Tol = Precision::Confusion(); //1.e-4;
     GeomAbs_Shape UCont = GeomAbs_C1, VCont = GeomAbs_C1;
     Standard_Integer degU = 14, degV = 14;
     Standard_Integer nmax = 16;
@@ -1508,8 +1505,7 @@ void GeomLib::ExtendSurfByLength(Handle(Geom_BoundedSurface)& Surface,
 //   Standard_Boolean rational = ( InU && BS->IsURational() ) 
 //                                   || ( !InU && BS->IsVRational() ) ;
   Standard_Boolean rational = (BS->IsURational() ||  BS->IsVRational());
-  Standard_Boolean NullWeight;
-   Standard_Real EpsW = 10*Precision::PConfusion();
+  constexpr Standard_Real EpsW = 10*Precision::PConfusion();
   Standard_Integer gap = 3;
   if ( rational ) gap++;
 
@@ -1739,7 +1735,7 @@ void GeomLib::ExtendSurfByLength(Handle(Geom_BoundedSurface)& Surface,
     TColStd_Array2OfReal& NewW = NewWeights->ChangeArray2();
 
     if (!rational) NewW.Init(1.);
-    NullWeight= Standard_False;
+    Standard_Boolean NullWeight= Standard_False;
 
     if (InU) {
       for (ii=1; ii<=NU && !NullWeight; ii++) {
@@ -1791,7 +1787,6 @@ void GeomLib::ExtendSurfByLength(Handle(Geom_BoundedSurface)& Surface,
       std::cout << "Echec de l'Extension rationnelle" << std::endl;    
 #endif
       lambmin /= 3.;
-      NullWeight = Standard_False;
     }
     else {
       ExtOk = Standard_True;
@@ -1985,7 +1980,7 @@ void GeomLib::AxeOfInertia(const TColgp_Array1OfPnt& Points,
 //function : CanBeTreated
 //purpose  : indicates if the surface can be treated(if the conditions are
 //           filled) and need to be treated(if the surface hasn't been yet
-//           treated or if the surface is rationnal and non periodic)
+//           treated or if the surface is rational and non periodic)
 //=======================================================================
 
 static Standard_Boolean CanBeTreated(Handle(Geom_BSplineSurface)& BSurf)
@@ -1998,7 +1993,9 @@ static Standard_Boolean CanBeTreated(Handle(Geom_BSplineSurface)& BSurf)
    return Standard_False;
  else {
    lambda=(BSurf->Weight(1,1)/BSurf->Weight(BSurf->NbUPoles(),1));
+// clang-format off
    for (i=1;i<=BSurf->NbVPoles();i++)      //test of the proportionnality of the denominator on the boundaries
+// clang-format on
      if ((BSurf->Weight(1,i)/(lambda*BSurf->Weight(BSurf->NbUPoles(),i))<(1-Precision::Confusion()))||
 	 (BSurf->Weight(1,i)/(lambda*BSurf->Weight(BSurf->NbUPoles(),i))>(1+Precision::Confusion())))
        return Standard_False;

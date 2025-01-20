@@ -172,7 +172,7 @@ static void CorrectSplitValues(const Handle(TColStd_HSequenceOfReal)& orig3d,
 			       Handle(TColStd_HSequenceOfReal) new2d,
 			       Handle(TColStd_HSequenceOfReal) new3d)
 {
-  Standard_Real preci = Precision::PConfusion();
+  constexpr Standard_Real preci = Precision::PConfusion();
   Standard_Integer len3d = orig3d->Length();
   Standard_Integer len2d = orig2d->Length();
   TColStd_Array1OfBoolean fixNew2d (1, len3d);
@@ -483,7 +483,9 @@ void ShapeUpgrade_WireDivide::Perform ()
       //gp_Pnt pntV2 = BRep_Tool::Pnt(V2); // pntV2 not used - see below (skl)
       //Standard_Real V2Tol = LimitTolerance( BRep_Tool::Tolerance(V2) ); // V2Tol not used - see below (skl)
       
+// clang-format off
       Handle(ShapeUpgrade_FixSmallCurves) FixSmallCurveTool = GetFixSmallCurveTool(); //gka Precision
+// clang-format on
       FixSmallCurveTool->SetMinTolerance(MinTolerance());
       FixSmallCurveTool->Init(E, myFace);
       FixSmallCurveTool->SetSplitCurve3dTool(theSplit3dTool);

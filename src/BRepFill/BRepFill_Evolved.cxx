@@ -3071,7 +3071,7 @@ void CutEdgeProf (const TopoDS_Edge&                  E,
 
   // On calcule les intersection avec Oy.
   Geom2dAdaptor_Curve ALine(Line);
-  Standard_Real Tol = Precision::Intersection();
+  constexpr Standard_Real Tol = Precision::Intersection();
   Standard_Real TolC = 0.;
 
   Geom2dInt_GInter Intersector(ALine,AC2d,TolC,Tol);
@@ -3144,7 +3144,7 @@ void CutEdgeProf (const TopoDS_Edge&                  E,
 
 //=======================================================================
 //function : CutEdge
-//purpose  : Cut an edge at thw extrema of curves and at points of inflexion.
+//purpose  : Cut an edge at the extrema of curves and at points of inflexion.
 //           Closed circles are also cut in two.
 //           If <Cuts> are empty the edge is not modified.
 //           The first and the last vertex of the original edge 

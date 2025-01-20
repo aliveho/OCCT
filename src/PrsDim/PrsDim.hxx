@@ -105,7 +105,7 @@ public:
   
   Standard_EXPORT static Standard_Boolean ComputeGeometry (const TopoDS_Vertex& aVertex, gp_Pnt& point, const Handle(Geom_Plane)& aPlane, Standard_Boolean& isOnPlane);
   
-  //! Tryes to get Plane from Face.  Returns Surface of Face
+  //! Tries to get Plane from Face.  Returns Surface of Face
   //! in aSurf.  Returns Standard_True  and Plane of Face in
   //! aPlane in following  cases:
   //! Face is Plane, Offset of Plane,
@@ -118,7 +118,7 @@ public:
   Standard_EXPORT static void InitFaceLength (const TopoDS_Face& aFace, gp_Pln& aPlane, Handle(Geom_Surface)& aSurface, PrsDim_KindOfSurface& aSurfaceType, Standard_Real& anOffset);
   
   //! Finds attachment points on two curvilinear faces for length dimension.
-  //! @param thePlaneDir [in] the direction on the dimension plane to
+  //! @param[in] thePlaneDir  the direction on the dimension plane to
   //! compute the plane automatically. It will not be taken into account if
   //! plane is defined by user.
   Standard_EXPORT static void InitLengthBetweenCurvilinearFaces (const TopoDS_Face& theFirstFace, const TopoDS_Face& theSecondFace, Handle(Geom_Surface)& theFirstSurf, Handle(Geom_Surface)& theSecondSurf, gp_Pnt& theFirstAttach, gp_Pnt& theSecondAttach, gp_Dir& theDirOnPlane);

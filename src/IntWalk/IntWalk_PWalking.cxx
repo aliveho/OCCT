@@ -2143,7 +2143,7 @@ DistanceMinimizeByGradient( const Handle(Adaptor3d_Surface)& theASurf1,
 {
   const Standard_Integer aNbIterMAX = 60;
   const Standard_Real aTol = 1.0e-14;
-  const Standard_Real aTolNul = 1.0 / Precision::Infinite();
+  constexpr Standard_Real aTolNul = 1.0 / Precision::Infinite();
 
   // I.e. if theU1 = 0.0 then Epsilon(theU1) = DBL_MIN (~1.0e-308).
   // Work with this number is impossible: there is a dangerous to 
@@ -2676,7 +2676,7 @@ Standard_Boolean IntWalk_PWalking::
 PutToBoundary(const Handle(Adaptor3d_Surface)& theASurf1,
               const Handle(Adaptor3d_Surface)& theASurf2)
 {
-  const Standard_Real aTolMin = Precision::Confusion();
+  constexpr Standard_Real aTolMin = Precision::Confusion();
 
   Standard_Boolean hasBeenAdded = Standard_False;
 
@@ -3493,7 +3493,7 @@ IntWalk_StatusDeflection  IntWalk_PWalking::TestDeflection(const IntImp_ConstIso
     Now, let substitute required deflection (tolconf or tolconf/2) to z. Then
     it is necessary to check if e < z or if e > z.
 
-    In this case, it is enough to comapare Fs(e) and Fs(z).
+    In this case, it is enough to compare Fs(e) and Fs(z).
     At that Fs(e) > 0 because sin(B/2) > 0 always.
 
     Therefore, if Fs(z) < 0.0 then Fs(e) > Fs(z) ==> e < z definitely.
@@ -3615,7 +3615,9 @@ TestArret(const Standard_Boolean DejaReparti,
       DPc       = Param(i)-Uvp[im1];                //--     Current   - Previous
       DPb       = Uvf[im1]-Uvp[im1];                //--     Bound Sup - Previous 
       ParC[im1] = Uvf[im1];                         //--     Param Corrige
+// clang-format off
       dv        = Param(k)-Uvp[k-1];                //--     Current   - Previous (other Direction)
+// clang-format on
       dv2       = dv*dv;
       if(dv2>RealEpsilon()) {                       //--     Progress in other Direction ?
         Duv[im1]  =  DPc*DPb + dv2;

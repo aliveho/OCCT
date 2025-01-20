@@ -2936,7 +2936,9 @@ static void UpdateInitOffset (BRepAlgo_Image&         myInitOffset,
 //=======================================================================
 void BRepOffset_MakeOffset::MakeMissingWalls (const Message_ProgressRange& theRange)
 {
+// clang-format off
   TopTools_IndexedDataMapOfShapeListOfShape Contours; //Start vertex + list of connected edges (free boundary)
+// clang-format on
   TopTools_DataMapOfShapeShape MapEF; //Edges of contours: edge + face
   Standard_Real OffsetVal = Abs(myOffset);
 
@@ -2986,7 +2988,7 @@ void BRepOffset_MakeOffset::MakeMissingWalls (const Message_ProgressRange& theRa
         // (one of reson is mixed connectivity of faces)
         // algoritm of cutting offset edge by intersection line 
         // can fail and offset edge cannot get vertices.
-        // Follwing workaround is only to avoid exeption if V3 and V4 are Null
+        // Follwing workaround is only to avoid exception if V3 and V4 are Null
         // Vertex points are invalid.
         Standard_Real anOEF, anOEL;
         TopAbs_Orientation anOEOri = OE.Orientation();
@@ -4573,7 +4575,7 @@ Standard_Boolean TrimEdge(TopoDS_Edge&                  NE,
   BOPTools_AlgoTools::MakeSplitEdge(NE, V1, aT1, V2, aT2, aSourceEdge);
   //
   //
-  Standard_Real aSameParTol = Precision::Confusion();
+  constexpr Standard_Real aSameParTol = Precision::Confusion();
   
   Standard_Real U = 0.;
   Standard_Real UMin =  Precision::Infinite();

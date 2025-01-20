@@ -57,7 +57,7 @@ public:
 
   //! Returns a copy of the frustum using the given frustum builder configuration.
   //! Returned frustum should be re-constructed before being used.
-  //! @param theBuilder [in] argument that represents corresponding settings for re-constructing transformed frustum from scratch;
+  //! @param[in] theBuilder  argument that represents corresponding settings for re-constructing transformed frustum from scratch;
   //!                        should NOT be NULL.
   //! @return a copy of the frustum with the input builder assigned
   Standard_EXPORT virtual Handle(SelectMgr_BaseIntersector) CopyWithBuilder (const Handle(SelectMgr_FrustumBuilder)& theBuilder) const Standard_OVERRIDE;
@@ -185,7 +185,9 @@ private:
 
 protected:
 
+// clang-format off
   SelectionTriangle mySelTriangle; //!< parameters of selection triangle (it is used to build triangle frustum)
+// clang-format on
 
 public:
 

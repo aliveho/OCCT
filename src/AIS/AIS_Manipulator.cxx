@@ -643,7 +643,7 @@ Standard_Boolean AIS_Manipulator::ObjectTransformation (const Standard_Integer t
 //function : ProcessDragging
 //purpose  :
 //=======================================================================
-Standard_Boolean AIS_Manipulator::ProcessDragging (const Handle(AIS_InteractiveContext)&,
+Standard_Boolean AIS_Manipulator::ProcessDragging (const Handle(AIS_InteractiveContext)& aCtx,
                                                    const Handle(V3d_View)& theView,
                                                    const Handle(SelectMgr_EntityOwner)&,
                                                    const Graphic3d_Vec2i& theDragFrom,
@@ -676,7 +676,16 @@ Standard_Boolean AIS_Manipulator::ProcessDragging (const Handle(AIS_InteractiveC
       return Standard_True;
     }
     case AIS_DragAction_Stop:
-      break;
+    {
+      //at the end of transformation redisplay for updating sensitive areas
+      StopTransform (true);
+      if (aCtx->IsDisplayed (this))
+      {
+        aCtx->Redisplay (this, true);
+      }
+      return Standard_True;
+    }
+    break;
   }
   return Standard_False;
 }
@@ -834,10 +843,18 @@ void AIS_Manipulator::updateTransformation()
   if (myIsZoomPersistentMode)
   {
     if (TransformPersistence().IsNull()
-    ||  TransformPersistence()->Mode() != Graphic3d_TMF_ZoomPers
+    ||  TransformPersistence()->Mode() != Graphic3d_TMF_AxialZoomPers
     || !TransformPersistence()->AnchorPoint().IsEqual (myPosition.Location(), 0.0))
     {
-      setTransformPersistence (new Graphic3d_TransformPers (Graphic3d_TMF_ZoomPers, myPosition.Location()));
+      setTransformPersistence (new Graphic3d_TransformPers (Graphic3d_TMF_AxialZoomPers, myPosition.Location()));
+    }
+  }
+  else
+  {
+    if (TransformPersistence().IsNull()
+    || TransformPersistence()->Mode() != Graphic3d_TMF_AxialScalePers)
+    {
+      setTransformPersistence (new Graphic3d_TransformPers (Graphic3d_TMF_AxialScalePers, myPosition.Location()));
     }
   }
 }
@@ -922,7 +939,7 @@ void AIS_Manipulator::SetZoomPersistence (const Standard_Boolean theToEnable)
 
   if (!theToEnable)
   {
-    setTransformPersistence (Handle(Graphic3d_TransformPers)());
+    setTransformPersistence (new (Graphic3d_TransformPers)(Graphic3d_TMF_AxialScalePers));
   }
 
   updateTransformation();
@@ -1131,8 +1148,10 @@ void AIS_Manipulator::ComputeSelection (const Handle(SelectMgr_Selection)& theSe
   // overlapping of sensitive areas when size of manipulator is small.
   // Sensitivity is calculated relative to the default size of the manipulator (100.0f).
   const Standard_ShortReal aSensitivityCoef = myAxes[0].Size() / 100.0f;
+// clang-format off
   const Standard_Integer aHighSensitivity = Max (Min (RealToInt (aSensitivityCoef * 15), 15), 3); // clamp sensitivity within range [3, 15]
   const Standard_Integer aLowSensitivity  = Max (Min (RealToInt (aSensitivityCoef * 10), 10), 2); // clamp sensitivity within range [2, 10]
+// clang-format on
 
   switch (aMode)
   {

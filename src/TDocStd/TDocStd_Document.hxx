@@ -98,7 +98,7 @@ public:
   //! Returns True if the main label has no attributes
   Standard_EXPORT Standard_Boolean IsEmpty() const;
   
-  //! Returns False if the  document has been modified
+  //! Returns False if the document has been modified
   //! but not recomputed.
   Standard_EXPORT Standard_Boolean IsValid() const;
   
@@ -117,7 +117,7 @@ public:
   //! Launches a new command. This command may be undone.
   Standard_EXPORT void NewCommand();
   
-  //! returns True if a Command transaction is open in the curret .
+  //! returns True if a Command transaction is open in the current .
   Standard_EXPORT Standard_Boolean HasOpenCommand() const;
   
   //! Opens a new command transaction in this document.
@@ -198,7 +198,7 @@ public:
   Standard_EXPORT void UpdateReferences (const TCollection_AsciiString& aDocEntry);
   
   //! Recompute if the document was  not valid and propagate
-  //! the reccorded modification.
+  //! the recorded modification.
   Standard_EXPORT void Recompute();
   
   //! This method Update   will be called

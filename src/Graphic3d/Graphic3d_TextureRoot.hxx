@@ -83,7 +83,7 @@ public:
 
   //! This method will be called by graphic driver each time when texture resource should be created.
   //! It is called in front of GetImage() for uploading compressed image formats natively supported by GPU.
-  //! @param theSupported [in] the list of supported compressed texture formats;
+  //! @param[in] theSupported  the list of supported compressed texture formats;
   //!                          returning image in unsupported format will result in texture upload failure
   //! @return compressed pixmap or NULL if image is not in supported compressed format
   Standard_EXPORT virtual Handle(Image_CompressedPixMap) GetCompressedImage (const Handle(Image_SupportedFormats)& theSupported);
@@ -147,6 +147,7 @@ protected:
 protected:
 
   Handle(Graphic3d_TextureParams) myParams;     //!< associated texture parameters
+// clang-format off
   TCollection_AsciiString         myTexId;      //!< unique identifier of this resource (for sharing graphic resource); should never be modified outside constructor
   Handle(Image_PixMap)            myPixMap;     //!< image pixmap - as one of the ways for defining the texture source
   OSD_Path                        myPath;       //!< image file path - as one of the ways for defining the texture source
@@ -155,6 +156,7 @@ protected:
   Standard_Boolean                myIsColorMap; //!< flag indicating color nature of values within the texture
   Standard_Boolean                myIsTopDown;  //!< Stores rows's memory layout
   Standard_Boolean                myHasMipmaps; //!< Indicates whether mipmaps should be generated or not
+// clang-format on
 
 };
 

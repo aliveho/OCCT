@@ -989,7 +989,7 @@ Standard_Boolean BOPTools_AlgoTools::GetFaceOff
   //
   // The difference between faces should be obvious enough
   // to guarantee the correctness of the classification
-  Standard_Real anAngleCriteria = Precision::Confusion();
+  constexpr Standard_Real anAngleCriteria = Precision::Confusion();
 
   bRet=Standard_True;
   aIt.Initialize(theLCSOff);
@@ -1924,7 +1924,8 @@ Standard_Boolean BOPTools_AlgoTools::IsBlockInOnFace
     return bFlag;
   }
   //
-  // Treatment intemediate
+
+  // Treatment intermediate
   Standard_Real m1, aTolF, aTolE, aTol, aDist;
   m1=IntTools_Tools::IntermediatePoint(f1, l1);
   BOPTools_AlgoTools::PointOnEdge(aE1, m1, aP12);
@@ -2180,7 +2181,7 @@ Standard_Real MinStep3D(const TopoDS_Edge& theE1,
     }
     //
     if (aR > 100.) {
-      Standard_Real d = 10*Precision::PConfusion();
+      constexpr Standard_Real d = 10*Precision::PConfusion();
       aDtMin = Max(aDtMin, sqrt(d*d + 2*d*aR));
     }
   }

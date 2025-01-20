@@ -445,7 +445,7 @@ static Handle(IntPatch_WLine)
   Standard_Real aPrevStep = aBase3dVec.SquareMagnitude();
 
   // Choose base tolerance and scale it to pipe algorithm.
-  const Standard_Real aBaseTolerance = Precision::Approximation();
+  constexpr Standard_Real aBaseTolerance = Precision::Approximation();
   Standard_Real aResS1Tol = Min(theS1->UResolution(aBaseTolerance),
                                 theS1->VResolution(aBaseTolerance));
   Standard_Real aResS2Tol = Min(theS2->UResolution(aBaseTolerance),
@@ -1728,7 +1728,6 @@ static Standard_Boolean IsNeedSkipWL(const Handle(IntPatch_WLine)& theWL,
 {
   Standard_Real aFirstp, aLastp;
   Standard_Integer aNbVtx = theWL->NbVertex();
-  Standard_Boolean isNeedSkip = Standard_True;
 
   for (Standard_Integer i = 1; i < aNbVtx; i++) {
     aFirstp = theWL->Vertex (i).ParameterOnLine();
@@ -1739,14 +1738,13 @@ static Standard_Boolean IsNeedSkipWL(const Handle(IntPatch_WLine)& theWL,
     const IntSurf_PntOn2S& aPmid = theWL->Point (pmid);
     aPmid.Parameters (aU1, aV1, aU2, aV2);
 
-    if (!IsOutOfDomain (theBoxS1, theBoxS2, aPmid, theArrPeriods))
+    if (IsOutOfDomain (theBoxS1, theBoxS2, aPmid, theArrPeriods))
     {
-      isNeedSkip = Standard_False;
-      break;
+      return Standard_True;
     }
   }
 
-  return isNeedSkip;
+  return Standard_False;
 }
 
 //=======================================================================

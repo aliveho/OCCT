@@ -500,11 +500,11 @@ public:
 
   //! Pick closest point under mouse cursor.
   //! This method is expected to be called from rendering thread.
-  //! @param thePnt   [out] result point
-  //! @param theCtx    [in] interactive context
-  //! @param theView   [in] active view
-  //! @param theCursor [in] mouse cursor
-  //! @param theToStickToPickRay [in] when TRUE, the result point will lie on picking ray
+  //! @param[out] thePnt    result point
+  //! @param[in] theCtx     interactive context
+  //! @param[in] theView    active view
+  //! @param[in] theCursor  mouse cursor
+  //! @param[in] theToStickToPickRay  when TRUE, the result point will lie on picking ray
   //! @return TRUE if result has been found
   Standard_EXPORT virtual bool PickPoint (gp_Pnt& thePnt,
                                           const Handle(AIS_InteractiveContext)& theCtx,
@@ -514,10 +514,10 @@ public:
 
   //! Pick closest point by axis.
   //! This method is expected to be called from rendering thread.
-  //! @param theTopPnt [out] result point
-  //! @param theCtx    [in] interactive context
-  //! @param theView   [in] active view
-  //! @param theAxis   [in] selection axis
+  //! @param[out] theTopPnt  result point
+  //! @param[in] theCtx     interactive context
+  //! @param[in] theView    active view
+  //! @param[in] theAxis    selection axis
   //! @return TRUE if result has been found
   Standard_EXPORT virtual bool PickAxis (gp_Pnt& theTopPnt,
                                          const Handle(AIS_InteractiveContext)& theCtx,
@@ -668,8 +668,8 @@ protected:
 
   //! Return current and previously fetched event times.
   //! This callback is intended to compute delta between sequentially processed events.
-  //! @param thePrevTime [out] events time fetched previous time by this method
-  //! @param theCurrTime [out] actual events time
+  //! @param[out] thePrevTime  events time fetched previous time by this method
+  //! @param[out] theCurrTime  actual events time
   void updateEventsTime (double& thePrevTime,
                          double& theCurrTime)
   {
@@ -703,6 +703,7 @@ protected:
   AIS_ViewInputBuffer myUI;                       //!< buffer for UI thread
   AIS_ViewInputBuffer myGL;                       //!< buffer for rendering thread
 
+// clang-format off
   Standard_Real       myLastEventsTime;           //!< last fetched events timer value for computing delta/progress
   Standard_Boolean    myToAskNextFrame;           //!< flag indicating that another frame should be drawn right after this one
   Standard_Boolean    myIsContinuousRedraw;       //!< continuous redrawing (without immediate rendering optimization)
@@ -743,6 +744,7 @@ protected:
 protected: //! @name XR input variables
 
   NCollection_Array1<Handle(AIS_XRTrackedDevice)> myXRPrsDevices; //!< array of XR tracked devices presentations
+// clang-format on
   Quantity_Color             myXRLaserTeleColor;  //!< color of teleport laser
   Quantity_Color             myXRLaserPickColor;  //!< color of picking  laser
   Aspect_XRTrackedDeviceRole myXRLastTeleportHand;//!< active hand for teleport
@@ -753,6 +755,7 @@ protected: //! @name XR input variables
   Standard_Real       myXRLastPickDepthLeft;      //!< last picking depth for left  hand
   Standard_Real       myXRLastPickDepthRight;     //!< last picking depth for right hand
   Standard_Real       myXRTurnAngle;              //!< discrete turn angle for XR trackpad
+// clang-format off
   Standard_Boolean    myToDisplayXRAuxDevices;    //!< flag to display auxiliary tracked XR devices
   Standard_Boolean    myToDisplayXRHands;         //!< flag to display XR hands
 
@@ -809,6 +812,7 @@ protected: //! @name rotation/panning transient state variables
   gp_Vec              myCamStartOpToCenter;       //!< vector from rotation gravity point to camera Center at the beginning of rotation
   gp_Vec              myCamStartOpToEye;          //!< vector from rotation gravity point to camera Eye    at the beginning of rotation
   Graphic3d_Vec3d     myRotateStartYawPitchRoll;  //!< camera yaw pitch roll at the beginning of rotation
+// clang-format on
 
 };
 

@@ -1,5 +1,18 @@
 # freetype
 
+# vcpkg processing
+if (BUILD_USE_VCPKG)
+  find_package (Freetype MODULE REQUIRED)
+  set (CSF_FREETYPE Freetype::Freetype)
+  if (WIN32)
+    set (USED_3RDPARTY_FREETYPE_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin")
+  else()
+    set (USED_3RDPARTY_FREETYPE_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib")
+  endif()
+  list (APPEND 3RDPARTY_INCLUDE_DIRS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
+  return()
+endif()
+
 if (NOT DEFINED INSTALL_FREETYPE AND BUILD_SHARED_LIBS)
   set (INSTALL_FREETYPE OFF CACHE BOOL "${INSTALL_FREETYPE_DESCR}")
 endif()
@@ -14,7 +27,7 @@ OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/occt_macros")
 OCCT_MAKE_COMPILER_SHORT_NAME()
 OCCT_MAKE_COMPILER_BITNESS()
 
-# specify freetype folder in connectin with 3RDPARTY_DIR
+# specify freetype folder in connection with 3RDPARTY_DIR
 if (3RDPARTY_DIR AND EXISTS "${3RDPARTY_DIR}")
   #CHECK_PATH_FOR_CONSISTENCY (3RDPARTY_DIR 3RDPARTY_FREETYPE_DIR PATH "The directory containing freetype")
 
@@ -162,6 +175,14 @@ if (IS_BUILTIN_SEARCH_REQUIRED)
       set (3RDPARTY_FREETYPE_LIBRARY_DIR "${3RDPARTY_FREETYPE_LIBRARY_DIR}" CACHE PATH "The directory containing freetype library" FORCE)
     else()
       set (3RDPARTY_FREETYPE_LIBRARY_DIR "" CACHE PATH "The directory containing freetype library" FORCE)
+    endif()
+  endif()
+
+  # In case of MinGW some libraries can have .dll.a extension, so we should check it and use instead of .a
+  if (MINGW AND 3RDPARTY_FREETYPE_LIBRARY AND EXISTS "${3RDPARTY_FREETYPE_LIBRARY}")
+    string (REPLACE ".a" ".dll.a" 3RDPARTY_FREETYPE_LIBRARY_TEST "${3RDPARTY_FREETYPE_LIBRARY}")
+    if (EXISTS "${3RDPARTY_FREETYPE_LIBRARY_TEST}")
+      set (3RDPARTY_FREETYPE_LIBRARY "${3RDPARTY_FREETYPE_LIBRARY_TEST}" CACHE FILEPATH "The path to freetype library" FORCE)
     endif()
   endif()
 endif()

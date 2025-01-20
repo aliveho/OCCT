@@ -696,7 +696,7 @@ Standard_Boolean ShapeFix_Wireframe::MergeSmallEdges(TopTools_MapOfShape& theSma
 		  C2->D1(first2,P,Vec2);
 		  if ( edge1.Orientation() == TopAbs_REVERSED ) Vec1.Reverse();
 		  if ( edge2.Orientation() == TopAbs_REVERSED ) Vec2.Reverse();
-          Standard_Real tol2 = Precision::SquareConfusion();
+          constexpr Standard_Real tol2 = Precision::SquareConfusion();
 		  if ( Vec1.SquareMagnitude() < tol2 ||
 		       Vec2.SquareMagnitude() < tol2 ) Ang1 = M_PI/2.;
 		  else Ang1 = Abs(Vec1.Angle(Vec2));
@@ -732,7 +732,9 @@ Standard_Boolean ShapeFix_Wireframe::MergeSmallEdges(TopTools_MapOfShape& theSma
                 
                 //gka protection against joining seem edges with other edges
 		Standard_Boolean same_set1 = (theList1.Extent()==theList2.Extent() && 
+// clang-format off
                                               ((!isSeam && !isSeam1)|| (isSeam && isSeam1))); //gka
+// clang-format on
 		Standard_Boolean same_set2 = (theList3.Extent()==theList2.Extent() && 
                                               ((!isSeam && !isSeam2)|| (isSeam && isSeam2)));
 		TopTools_MapOfShape theSetOfFaces;
@@ -1145,7 +1147,7 @@ Standard_Boolean ShapeFix_Wireframe::MergeSmallEdges(TopTools_MapOfShape& theSma
 		  C2->D1(first2,P,Vec2);
 		  if ( edge1.Orientation() == TopAbs_REVERSED ) Vec1.Reverse();
 		  if ( edge2.Orientation() == TopAbs_REVERSED ) Vec2.Reverse();
-          Standard_Real tol2 = Precision::SquareConfusion();
+          constexpr Standard_Real tol2 = Precision::SquareConfusion();
 		  if ( Vec1.SquareMagnitude() < tol2 ||
 		       Vec2.SquareMagnitude() < tol2 ) Ang1 = M_PI/2.;
 		  else Ang1 = Abs(Vec1.Angle(Vec2));
@@ -1181,7 +1183,9 @@ Standard_Boolean ShapeFix_Wireframe::MergeSmallEdges(TopTools_MapOfShape& theSma
                 
                 //gka protection against joining seem edges with other edges
 		Standard_Boolean same_set1 = (theList1.Extent()==theList2.Extent() && 
+// clang-format off
                                               ((!isSeam && !isSeam1)|| (isSeam && isSeam1))); //gka
+// clang-format on
 		Standard_Boolean same_set2 = (theList3.Extent()==theList2.Extent() && 
                                               ((!isSeam && !isSeam2)|| (isSeam && isSeam2)));
 		TopTools_MapOfShape theSetOfFaces;

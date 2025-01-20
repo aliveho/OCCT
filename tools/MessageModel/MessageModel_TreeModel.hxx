@@ -47,19 +47,19 @@ public:
 
   //!< Returns columns of the model for the metric
   //!< \param theMetricType metric
-  //!< \param theMetricColumns [out] container of metric columns
+  //!< \param[out] theMetricColumns  container of metric columns
   static Standard_EXPORT void GetMetricColumns (const Message_MetricType theMetricType, QList<int>& theMetricColumns);
 
   //!< Returns metric type for the column
-  //!< \param theColumnId [in] index of the tree column
-  //!< \param theMetricType [out] metric type if found
-  //!< \param thePosition [out] index of the metric column, 0 - is metric, 1 - is delta
+  //!< \param[in] theColumnId  index of the tree column
+  //!< \param[out] theMetricType  metric type if found
+  //!< \param[out] thePosition  index of the metric column, 0 - is metric, 1 - is delta
   //!< \return true if the column has metric parameters
   static Standard_EXPORT bool IsMetricColumn (const int theColumnId, Message_MetricType& theMetricType, int& thePosition);
 
   //! Returns true if parameter report was added into the model
   //! \param theReport a report instance
-  //! \return boolen value
+  //! \return boolean value
   Standard_EXPORT Standard_Boolean HasReport (const Handle(Message_Report)& theReport);
 
   //! Add shape, append it to the model root item
@@ -79,7 +79,7 @@ public:
   Standard_EXPORT const NCollection_List<MessageModel_ReportInformation>& Reports() const;
 
   //! Sets the text value of the Root item, only "Name" column accepts the parameter value
-  //! \theName visulized text of root item
+  //! \theName visualized text of root item
   Standard_EXPORT void SetRootItemName (const TCollection_AsciiString& theName);
 
   //! Updates tree model

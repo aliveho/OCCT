@@ -135,13 +135,20 @@ static Standard_Integer QAHandleOps (Draw_Interpretor& theDI,
   // compiler does not keep temporary object referenced by local variable of base type;
   // here compiler does not recognize that it should keep the temporary object because handle
   // classes do not inherit each other and they use hard cast for references to simulate inheritance
+#if defined(__GNUC__) && (__GNUC__ > 12)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"
+#endif
   const Handle(Geom_Curve)& aTmpRefBase (Handle(Geom_Line)::DownCast (aCurve2));
   CHECK(theDI, aTmpRefBase.get() != aCurve2.get(),  "local reference to temporary handle object (base type)");
+#if defined(__GNUC__) && (__GNUC__ > 12)
+#pragma GCC diagnostic pop
+#endif
 
   // check operations with Handle_* classes
   Handle(Geom_Line) hLine = aLine;
   CHECK(theDI, ! hLine.IsNull(), "hhandle for non-null");
-
+#include <Standard_WarningsDisable.hxx>
   const Handle_Geom_Line& chLine = aLine; // cast to self const ref
   const Handle_Geom_Curve& chCurve = aLine; // cast to base const ref
   const Handle_Geom_Line& hhLine = hLine; // cast to self const ref
@@ -174,11 +181,18 @@ static Standard_Integer QAHandleOps (Draw_Interpretor& theDI,
   Handle_Geom_Line qhLine = cpLine; // constructor from const pointer -- could be made explicit...
 
   // check that compiler keeps temporary object referenced by local variable
+#if defined(__GNUC__) && (__GNUC__ > 12)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"
+#endif
   const Handle_Geom_Line& hTmpRef (Handle(Geom_Line)::DownCast (aCurve2));
   CHECK(theDI, hTmpRef.get() == aCurve2.get(),  "local reference to temporary object (Handle_)");
 
   // check lifetime of temporary object referenced by local variable (base type)
   const Handle_Geom_Curve& hTmpRefBase (Handle(Geom_Line)::DownCast (aCurve2));
+  #if defined(__GNUC__) && (__GNUC__ > 11)
+#pragma GCC diagnostic pop
+#endif
   // here we have different behavior for MSVC 2013+ where Handle_ is a class
   // (compiler creates temporary object of approprtiate type and keeps it living
   // until the reference is valid) and other compilers where Handle_ is
@@ -189,7 +203,7 @@ static Standard_Integer QAHandleOps (Draw_Interpretor& theDI,
 #else
   CHECK(theDI, hTmpRefBase.get() != aCurve2.get(),  "local reference to temporary handle object (Handle_ to base type)");
 #endif
-
+#include <Standard_WarningsRestore.hxx>
   Handle(Geom_Surface) aSurf;
   (void)aSurf;
 
@@ -198,7 +212,9 @@ static Standard_Integer QAHandleOps (Draw_Interpretor& theDI,
   gunc (cLine); // passing const handle as non-const reference to base type
   pLine = cLine.get(); // getting non-const pointer to contained object from const handle 
   Handle(Geom_Line) xLine = cCurve; // copy from handle to base type
+// clang-format off
   Handle(Geom_BSplineCurve) aBSpl (new Geom_Line (gp::Origin(), gp::DX())); // construction from pointer to incompatible type
+// clang-format on
 
   CHECK(theDI, aLine == aSurf,  "equality of handles of incompatible types");
   CHECK(theDI, aSurf == cLine,  "equality of const and non-const handle");

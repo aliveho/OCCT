@@ -4,7 +4,6 @@ ElSLib
 BSplCLib
 BSplSLib
 PLib
-Precision
 GeomAbs
 Poly
 CSLib
@@ -14,5 +13,3 @@ BVH
 gp
 TColgp
 TopLoc
-Expr
-ExprIntrp

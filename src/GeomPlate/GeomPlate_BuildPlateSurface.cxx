@@ -1596,7 +1596,9 @@ void GeomPlate_BuildPlateSurface::ComputeSurfInit(const Message_ProgressRange& t
       Handle( Geom_Surface ) InitPlane = 
 	(Handle( Geom_RectangularTrimmedSurface )::DownCast(mySurfInit))->BasisSurface();
       
+// clang-format off
       Standard_Real Ratio = 0., R1 = 2., R2 = 0.6; //R1 = 3, R2 = 0.5;//R1 = 1.4, R2 = 0.8; //R1 = 5., R2 = 0.2; 
+// clang-format on
       Handle( GeomAdaptor_Surface ) hsur = 
 	new GeomAdaptor_Surface( InitPlane );
       Standard_Integer NbPoint = 20;
@@ -1986,7 +1988,7 @@ Intersect(Handle(GeomPlate_HArray1OfSequenceOfReal)& PntInter,
 // the table of sequences Parcont contains all 
 // parameter of points on curves 
 // Field myPlateCont contains parameter of points on a plate;
-// it excludes duplicate points and imcompatible zones.
+// it excludes duplicate points and incompatible zones.
 // The first part corresponds to verification of compatibility
 // and to removal of duplicate points.
 //---------------------------------------------------------

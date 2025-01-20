@@ -575,8 +575,10 @@ void TopOpeBRepBuild_Builder::MergeKPartiskoletge()
 //    if (!ok) {FUN_Raise(); return;}
     
     // new topologies :
+// clang-format off
     TopTools_IndexedDataMapOfShapeListOfShape fcnewfcSMA;// faces connexed to fSMA built up with the split of outerwSMA
     TopTools_IndexedDataMapOfShapeListOfShape fcnewfcGRE;// faces connexed to fGRE built up with the split of outerwGRE    
+// clang-format on
     Standard_Boolean ok = ::FUN_rebuildfc((*this),myDataStructure,staSMA,*pfSMA,EnewE,fcnewfcSMA);
     if (!ok) {FUN_Raise(); return;}
     Standard_Integer nfcSMA = fcnewfcSMA.Extent();
@@ -1027,8 +1029,8 @@ Standard_Integer TopOpeBRepBuild_Builder::KPiskoletge()
   Standard_Boolean se2ONouterw1 =  ::sectionedgesON(myDataStructure,outerw2,mape1);
   if (!se2ONouterw1) return 0;
 
-  // NYI : <fi> interfers with faces of <Sj> on edges different from outerw's edges
-  // ------------------------------------------------------------------------------
+  // NYI : <fi> interferes with faces of <Sj> on edges different from outerw's edges
+  // -------=-----------------------------------------------------------------------
   Standard_Boolean allI1onseouterw = ::allIonsectionedges(myDataStructure,f1,mape1,mape2);
   if (!allI1onseouterw) return 0;
   Standard_Boolean allI2onseouterw = ::allIonsectionedges(myDataStructure,f2,mape2,mape1);

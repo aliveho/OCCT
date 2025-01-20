@@ -61,7 +61,7 @@ void ShapeUpgrade_ConvertCurve2dToBezier::Compute()
 {
   mySegments->Clear();
   mySplitParams->Clear();
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   Standard_Real First =  mySplitValues->Value(1);
   Standard_Real Last = mySplitValues->Value(mySplitValues->Length());
   
@@ -132,7 +132,9 @@ void ShapeUpgrade_ConvertCurve2dToBezier::Compute()
     Handle(Geom2d_BSplineCurve) aBSpline2d;
     Standard_Real Shift = 0.;
     if(myCurve->IsKind(STANDARD_TYPE(Geom2d_Conic))) {
+// clang-format off
       Handle(Geom2d_Curve) tcurve = new Geom2d_TrimmedCurve(myCurve,First,Last); //protection against parabols ets
+// clang-format on
       Geom2dConvert_ApproxCurve approx (tcurve, Precision::Approximation(), 
 					GeomAbs_C1, 100, 6 );
       if ( approx.HasResult() )
@@ -171,7 +173,7 @@ void ShapeUpgrade_ConvertCurve2dToBezier::Compute()
       mySplitValues->SetValue(mySplitValues->Length(),Last);
     }
 
-    // PTV 20.12.2001 Try to simpify BSpline Curve
+    // PTV 20.12.2001 Try to simplify BSpline Curve
     ShapeCustom_Curve2d::SimplifyBSpline2d (aBSpline2d, Precision::Approximation());
     
     Geom2dConvert_BSplineCurveToBezierCurve tool(aBSpline2d,First,Last,precision);
@@ -232,7 +234,7 @@ void ShapeUpgrade_ConvertCurve2dToBezier::Compute()
 
 void ShapeUpgrade_ConvertCurve2dToBezier::Build(const Standard_Boolean /*Segment*/)
 {
-  Standard_Real prec = Precision::PConfusion();
+  constexpr Standard_Real prec = Precision::PConfusion();
   Standard_Integer nb = mySplitValues->Length();
   myResultingCurves =  new TColGeom2d_HArray1OfCurve (1,nb-1);
   Standard_Real prevPar =0.;

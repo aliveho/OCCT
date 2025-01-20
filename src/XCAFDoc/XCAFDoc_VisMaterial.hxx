@@ -167,7 +167,7 @@ public: //! @name interface implementation
   virtual const Standard_GUID& ID() const Standard_OVERRIDE { return GetID(); }
 
   //! Restore attribute from specified state.
-  //! @param theWith [in] attribute state to restore (copy into this)
+  //! @param[in] theWith  attribute state to restore (copy into this)
   Standard_EXPORT virtual void Restore (const Handle(TDF_Attribute)& theWith) Standard_OVERRIDE;
 
   //! Create a new empty attribute.
@@ -175,7 +175,7 @@ public: //! @name interface implementation
 
   //! Paste this attribute into another one.
   //! @param theInto [in/out] target attribute to copy this into
-  //! @param theRelTable [in] relocation table
+  //! @param[in] theRelTable  relocation table
   Standard_EXPORT virtual void Paste (const Handle(TDF_Attribute)& theInto,
                                       const Handle(TDF_RelocationTable)& theRelTable) const Standard_OVERRIDE;
   
@@ -187,9 +187,11 @@ private:
   Handle(TCollection_HAsciiString) myRawName;       //!< material name / tag (transient data)
   XCAFDoc_VisMaterialPBR           myPbrMat;        //!< metal-roughness material definition
   XCAFDoc_VisMaterialCommon        myCommonMat;     //!< common material definition
+// clang-format off
   Graphic3d_AlphaMode              myAlphaMode;     //!< alpha mode; Graphic3d_AlphaMode_BlendAuto by default
   Standard_ShortReal               myAlphaCutOff;   //!< alpha cutoff value; 0.5 by default
   Graphic3d_TypeOfBackfacingModel  myFaceCulling;   //!< specifies whether the material is double/single sided
+// clang-format on
 
 };
 

@@ -1,5 +1,18 @@
 # tbb
 
+# vcpkg processing
+if (BUILD_USE_VCPKG)
+  find_package(TBB CONFIG REQUIRED)
+  set(CSF_TBB TBB::tbb TBB::tbbmalloc)
+  if (WIN32)
+    set (USED_3RDPARTY_TBB_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin")
+  else()
+    set (USED_3RDPARTY_TBB_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib")
+  endif()
+  list (APPEND 3RDPARTY_INCLUDE_DIRS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/tbb")
+  return()
+endif()
+
 if (MSVC AND BUILD_SHARED_LIBS)
   add_definitions (-D__TBB_NO_IMPLICIT_LINKAGE)
   add_definitions (-D__TBBMALLOC_NO_IMPLICIT_LINKAGE)
@@ -27,7 +40,7 @@ if (WIN32)
 
   # Below, we have correct 3RDPARTY_DIR.
 
-  # Initialize TBB folder in connectin with 3RDPARTY_DIR.
+  # Initialize TBB folder in connection with 3RDPARTY_DIR.
   if (("${3RDPARTY_TBB_DIR}" STREQUAL "") OR (NOT EXISTS "${3RDPARTY_TBB_DIR}"))
     FIND_PRODUCT_DIR ("${3RDPARTY_DIR}" TBB TBB_DIR_NAME)
     if (TBB_DIR_NAME)
@@ -44,7 +57,7 @@ if (WIN32)
       REQUIRED
       CONFIG)
 
-    # Achive include directory
+    # Archive include directory
     get_target_property (TBB_INCLUDE_DIR TBB::tbb INTERFACE_INCLUDE_DIRECTORIES)
     if (NOT DEFINED 3RDPARTY_TBB_INCLUDE_DIR)
       set (3RDPARTY_TBB_INCLUDE_DIR "" CACHE PATH "The directory containing headers of the TBB")
@@ -56,13 +69,17 @@ if (WIN32)
       list (APPEND 3RDPARTY_NOT_INCLUDED 3RDPARTY_TBB_INCLUDE_DIR)
     endif()
 
+    # Get installed configuration of tbb
+    get_target_property (TARGET_TBB_IMPORT_CONFS TBB::tbb IMPORTED_CONFIGURATIONS)
+    list (GET TARGET_TBB_IMPORT_CONFS 0 CHOSEN_IMPORT_CONF)
+
     separate_arguments (CSF_TBB)
     foreach (LIB IN LISTS CSF_TBB)
       string(TOLOWER "${LIB}" LIB_LOWER)
       string(TOUPPER "${LIB}" LIB_UPPER)
 
-      # Achive *.lib files and directory containing it.
-      get_target_property (TBB_LIB_FILE "TBB::${LIB_LOWER}" IMPORTED_IMPLIB_RELEASE)
+      # Archive *.lib files and directory containing it.
+      get_target_property (TBB_LIB_FILE "TBB::${LIB_LOWER}" IMPORTED_IMPLIB_${CHOSEN_IMPORT_CONF})
       # Reserve cache variable for *.lib.
       if (NOT DEFINED 3RDPARTY_${LIB_UPPER}_LIBRARY)
         set (3RDPARTY_${LIB_UPPER}_LIBRARY "" CACHE FILEPATH "${LIB_UPPER} library (*.lib)")
@@ -88,8 +105,8 @@ if (WIN32)
         list (APPEND 3RDPARTY_NO_LIBS 3RDPARTY_${LIB_UPPER}_LIBRARY_DIR)
       endif()
 
-      # Achive *.dll files and directory containing it.
-      get_target_property (TBB_DLL_FILE "TBB::${LIB_LOWER}" IMPORTED_LOCATION_RELEASE)
+      # Archive *.dll files and directory containing it.
+      get_target_property (TBB_DLL_FILE "TBB::${LIB_LOWER}" IMPORTED_LOCATION_${CHOSEN_IMPORT_CONF})
       # Reserve cache variable for *.dll.
       if (NOT DEFINED 3RDPARTY_${LIB_UPPER}_DLL)
         set (3RDPARTY_${LIB_UPPER}_DLL "" CACHE FILEPATH "${LIB_UPPER} library (*.dll)")
@@ -171,9 +188,9 @@ else ()
     REQUIRED
     CONFIG)
   endif()
-  # TBB has been configured (in other case FATAL_ERROR occures).
+  # TBB has been configured (in other case FATAL_ERROR occurs).
 
-  # Achive include directory.
+  # Archive include directory.
   get_target_property (TBB_INCLUDE_DIR TBB::tbb INTERFACE_INCLUDE_DIRECTORIES)
   if (NOT DEFINED 3RDPARTY_TBB_INCLUDE_DIR)
     set (3RDPARTY_TBB_INCLUDE_DIR "" CACHE PATH "The directory containing headers of the TBB")
@@ -185,13 +202,17 @@ else ()
     list (APPEND 3RDPARTY_NOT_INCLUDED 3RDPARTY_TBB_INCLUDE_DIR)
   endif()
 
+  # Get installed configuration of tbb
+  get_target_property (TARGET_TBB_IMPORT_CONFS TBB::tbb IMPORTED_CONFIGURATIONS)
+  list (GET TARGET_TBB_IMPORT_CONFS 0 CHOSEN_IMPORT_CONF)
+
   separate_arguments (CSF_TBB)
   foreach (LIB IN LISTS CSF_TBB)
     string(TOLOWER "${LIB}" LIB_LOWER)
     string(TOUPPER "${LIB}" LIB_UPPER)
 
-    # Achive *.so files and directory containing it.
-    get_target_property (TBB_SO_FILE "TBB::${LIB_LOWER}" IMPORTED_LOCATION_RELEASE)
+    # Archive *.so files and directory containing it.
+    get_target_property (TBB_SO_FILE "TBB::${LIB_LOWER}" IMPORTED_LOCATION_${CHOSEN_IMPORT_CONF})
     # Reserve cache variable for *.so.
     if (NOT DEFINED 3RDPARTY_${LIB_UPPER}_LIBRARY)
       set (3RDPARTY_${LIB_UPPER}_LIBRARY "" CACHE FILEPATH "${LIB_UPPER} library (*.so)")

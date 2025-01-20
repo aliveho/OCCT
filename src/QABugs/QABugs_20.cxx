@@ -1613,8 +1613,8 @@ static Standard_Integer OCC27466(Draw_Interpretor& theDI,
     return 1;
   BRepAdaptor_Surface aSurf(aFace);
 
-  Standard_Real aTolU = Precision::PConfusion();
-  Standard_Real aTolV = Precision::PConfusion();
+  constexpr Standard_Real aTolU = Precision::PConfusion();
+  constexpr Standard_Real aTolV = Precision::PConfusion();
 
   Extrema_GenLocateExtPS anExtrema(aSurf, aTolU, aTolV);
   anExtrema.Perform(aPnt, aUV.X(), aUV.Y(), Standard_True);
@@ -4581,7 +4581,7 @@ void QABugs::Commands_20(Draw_Interpretor& theCommands) {
     __FILE__,
     QACheckBends, group);
   theCommands.Add("OCC26441",
-    "OCC26441 shape ref_shape [tol [all_diff 0/1]] \nif all_diff = 0, only icreasing tolerances is considered" ,
+    "OCC26441 shape ref_shape [tol [all_diff 0/1]] \nif all_diff = 0, only increasing tolerances is considered" ,
     __FILE__,
     OCC26441, group);
 

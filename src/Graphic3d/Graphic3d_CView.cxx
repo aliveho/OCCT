@@ -42,6 +42,9 @@ Graphic3d_CView::Graphic3d_CView (const Handle(Graphic3d_StructureManager)& theM
   myBackfacing (Graphic3d_TypeOfBackfacingModel_Auto),
   myVisualization (Graphic3d_TOV_WIREFRAME),
   //
+  myZLayerTarget (Graphic3d_ZLayerId_BotOSD),
+  myZLayerRedrawMode (Standard_False),
+  //
   myBgColor (Quantity_NOC_BLACK),
   myBackgroundType (Graphic3d_TOB_NONE),
   myToUpdateSkydome (Standard_False),
@@ -731,7 +734,9 @@ void Graphic3d_CView::Compute()
     const Graphic3d_TypeOfAnswer anAnswer = acceptDisplay (aStructIter.Key()->Visual());
     if (anAnswer == Graphic3d_TOA_COMPUTE)
     {
+// clang-format off
       aStructsSeq.Append (aStructIter.Key()); // if the structure was calculated, it is recalculated
+// clang-format on
     }
   }
 

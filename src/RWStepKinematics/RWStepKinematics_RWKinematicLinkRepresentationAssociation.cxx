@@ -14,7 +14,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <RWStepKinematics_RWKinematicLinkRepresentationAssociation.hxx>
+#include "RWStepKinematics_RWKinematicLinkRepresentationAssociation.pxx"
 
 #include <Interface_EntityIterator.hxx>
 #include <StepData_StepReaderData.hxx>
@@ -62,7 +62,7 @@ void RWStepKinematics_RWKinematicLinkRepresentationAssociation::ReadStep (const 
   StepRepr_RepresentationOrRepresentationReference aRepresentationRelationship_Rep2;
   theData->ReadEntity (theNum, 4, "representation_relationship.rep2", theArch, aRepresentationRelationship_Rep2);
 
-  // Process only one type (Representaion)
+  // Process only one type (Representation)
   if (aRepresentationRelationship_Rep1.CaseNumber() != 1 || aRepresentationRelationship_Rep1.CaseNumber() != 1)
     return;
 

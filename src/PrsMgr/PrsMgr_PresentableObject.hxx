@@ -287,11 +287,11 @@ public: //! @name clipping planes
   //! Besides of this, some planes can be already set in view where the object
   //! is shown: the number of these planes should be subtracted from limit
   //! to predict the maximum possible number of object clipping planes.
-  //! @param thePlane [in] the clip plane to be appended to map of clip planes.
+  //! @param[in] thePlane  the clip plane to be appended to map of clip planes.
   Standard_EXPORT virtual void AddClipPlane (const Handle(Graphic3d_ClipPlane)& thePlane);
 
   //! Removes previously added clip plane.
-  //! @param thePlane [in] the clip plane to be removed from map of clip planes.
+  //! @param[in] thePlane  the clip plane to be removed from map of clip planes.
   Standard_EXPORT virtual void RemoveClipPlane (const Handle(Graphic3d_ClipPlane)& thePlane);
 
 public: //! @name parent/children properties
@@ -355,9 +355,9 @@ protected: //! @name interface methods
   //! Each of the views in the viewer and every modification such as rotation, for example, entails recalculation.
   //! Default implementation throws Standard_NotImplemented exception
   //! Warning! The transformation must be applied to the object before computation.
-  //! @param theProjector [in] view orientation
-  //! @param theTrsf [in] additional transformation, or NULL if undefined
-  //! @param thePrs  [in] presentation to fill
+  //! @param[in] theProjector  view orientation
+  //! @param[in] theTrsf  additional transformation, or NULL if undefined
+  //! @param[in] thePrs   presentation to fill
   Standard_EXPORT virtual void computeHLR (const Handle(Graphic3d_Camera)& theProjector,
                                            const Handle(TopLoc_Datum3D)& theTrsf,
                                            const Handle(Prs3d_Presentation)& thePrs);
@@ -519,6 +519,7 @@ protected:
 
 protected:
 
+// clang-format off
   PrsMgr_PresentableObject*              myParent;                  //!< pointer to the parent object
   PrsMgr_Presentations                   myPresentations;           //!< list of presentations
   Handle(Graphic3d_ViewAffinity)         myViewAffinity;            //!< view affinity mask
@@ -545,6 +546,7 @@ protected:
   Standard_Boolean                       myHasOwnPresentations;     //!< flag indicating if object should have own presentations
 
   Standard_Boolean                       myToPropagateVisualState;  //!< flag indicating if visual state (display/erase/color) should be propagated to all children
+// clang-format on
 };
 
 DEFINE_STANDARD_HANDLE(PrsMgr_PresentableObject, Standard_Transient)

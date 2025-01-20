@@ -64,7 +64,7 @@ public:
 
   //! Returns a copy of the frustum using the given frustum builder configuration.
   //! Returned frustum should be re-constructed before being used.
-  //! @param theBuilder [in] argument that represents corresponding settings for re-constructing transformed frustum from scratch;
+  //! @param[in] theBuilder  argument that represents corresponding settings for re-constructing transformed frustum from scratch;
   //!                        should NOT be NULL.
   //! @return a copy of the frustum with the input builder assigned
   Standard_EXPORT virtual Handle(SelectMgr_BaseIntersector) CopyWithBuilder (const Handle(SelectMgr_FrustumBuilder)& theBuilder) const Standard_OVERRIDE;
@@ -195,6 +195,7 @@ private:
 private:
 
   SelectMgr_TriangFrustums      myFrustums;          //!< set of triangular frustums
+// clang-format off
   SelectionPolyline             mySelPolyline;       //!< parameters of selection polyline (it is used to build triangle frustum set)
   TColgp_Array1OfPnt            myBoundaryPoints;    //!< boundary points
                                                      //!       1_____2
@@ -204,6 +205,7 @@ private:
                                                      //!    | /       \ |
                                                      //!   8|/_________\|7
   Standard_Boolean              myToAllowOverlap;    //!< flag to detect only fully included sensitives or not
+// clang-format on
 };
 
 #endif // _SelectMgr_TriangularFrustumSet_HeaderFile

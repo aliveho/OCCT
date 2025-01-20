@@ -180,7 +180,7 @@ static void TreatInfinitePlane(const gp_Pln        &aPlane,
 {
   // Get 3 coordinate axes of the plane.
   const gp_Dir        &aNorm        = aPlane.Axis().Direction();
-  const Standard_Real  anAngularTol = RealEpsilon();
+  constexpr Standard_Real  anAngularTol = RealEpsilon();
 
   // Get location of the plane as its barycenter
   gp_Pnt aLocation = BaryCenter(aPlane, aUMin, aUMax, aVMin, aVMax);
@@ -215,7 +215,7 @@ static void TreatInfinitePlane(const gp_Pln        &aPlane,
 // theMinIdx - minimum poles index, that can be used.
 // theMaxIdx - maximum poles index, that can be used.
 // theShiftCoeff - shift between flatknots array and poles array.
-// This vaule should be equal to 1 in case of non periodic BSpline,
+// This value should be equal to 1 in case of non periodic BSpline,
 // and (degree + 1) - mults(the lowest index).
 
 void ComputePolesIndexes(const TColStd_Array1OfReal &theKnots,

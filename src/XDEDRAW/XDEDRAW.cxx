@@ -25,22 +25,22 @@
 #include <DDocStd.hxx>
 #include <DDocStd_DrawDocument.hxx>
 #include <DE_Wrapper.hxx>
-#include <DEBRepCascade_ConfigurationNode.hxx>
-#include <DEXCAFCascade_ConfigurationNode.hxx>
+#include <DEBREP_ConfigurationNode.hxx>
+#include <DEXCAF_ConfigurationNode.hxx>
 #include <Draw.hxx>
 #include <Draw_PluginMacro.hxx>
 #include <Draw_ProgressIndicator.hxx>
 #include <Geom_Axis2Placement.hxx>
-#include <IGESCAFControl_ConfigurationNode.hxx>
+#include <DEIGES_ConfigurationNode.hxx>
 #include <Prs3d_Drawer.hxx>
 #include <Prs3d_LineAspect.hxx>
 #include <Quantity_Color.hxx>
-#include <RWStl_ConfigurationNode.hxx>
-#include <RWGltf_ConfigurationNode.hxx>
-#include <RWObj_ConfigurationNode.hxx>
-#include <RWPly_ConfigurationNode.hxx>
+#include <DESTL_ConfigurationNode.hxx>
+#include <DEGLTF_ConfigurationNode.hxx>
+#include <DEOBJ_ConfigurationNode.hxx>
+#include <DEPLY_ConfigurationNode.hxx>
 #include <STEPCAFControl_Controller.hxx>
-#include <STEPCAFControl_ConfigurationNode.hxx>
+#include <DESTEP_ConfigurationNode.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <TCollection_HAsciiString.hxx>
@@ -79,7 +79,7 @@
 #include <V3d_Viewer.hxx>
 #include <ViewerTest.hxx>
 #include <ViewerTest_AutoUpdater.hxx>
-#include <Vrml_ConfigurationNode.hxx>
+#include <DEVRML_ConfigurationNode.hxx>
 #include <XCAFDoc.hxx>
 #include <XCAFDoc_AssemblyIterator.hxx>
 #include <XCAFDoc_AssemblyGraph.hxx>
@@ -98,6 +98,7 @@
 #include <XCAFDoc_LayerTool.hxx>
 #include <XCAFDoc_Material.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
+#include <XCAFDoc_VisMaterialTool.hxx>
 #include <XCAFDoc_Volume.hxx>
 #include <XCAFPrs.hxx>
 #include <XCAFPrs_AISObject.hxx>
@@ -111,8 +112,6 @@
 #include <XDEDRAW_GDTs.hxx>
 #include <XDEDRAW_Views.hxx>
 #include <XDEDRAW_Notes.hxx>
-#include <XSDRAWIGES.hxx>
-#include <XSDRAWSTEP.hxx>
 #include <UnitsMethods.hxx>
 
 #include <BinXCAFDrivers.hxx>
@@ -323,7 +322,7 @@ static Standard_Integer dump (Draw_Interpretor& di, Standard_Integer argc, const
 //=======================================================================
 
 static void StatAssembly(const TDF_Label L,
-			 const Standard_Integer level,
+                         const Standard_Integer level,
                          Handle(TColStd_HArray1OfInteger) &HAI,
                          Standard_Integer &NbCentroidProp,
                          Standard_Integer &NbVolumeProp,
@@ -331,9 +330,10 @@ static void StatAssembly(const TDF_Label L,
                          Standard_Integer &NbShapesWithName,
                          Standard_Integer &NbShapesWithColor,
                          Standard_Integer &NbShapesWithLayer,
+                         Standard_Integer &NbShapesWithVisMaterial,
                          Handle(TDocStd_Document) &aDoc,
                          Standard_Boolean &PrintStructMode,
-			 Draw_Interpretor& di)
+                         Draw_Interpretor& di)
 {
   if(PrintStructMode) {
     for(Standard_Integer j=0; j<=level; j++)
@@ -370,6 +370,7 @@ static void StatAssembly(const TDF_Label L,
   }
   Handle(XCAFDoc_ColorTool) CTool = XCAFDoc_DocumentTool::ColorTool(aDoc->Main());
   Handle(XCAFDoc_LayerTool) LTool = XCAFDoc_DocumentTool::LayerTool(aDoc->Main());
+  Handle(XCAFDoc_VisMaterialTool) VMTool = XCAFDoc_DocumentTool::VisMaterialTool(aDoc->Main());
   Quantity_ColorRGBA col;
   Standard_Boolean IsColor = Standard_False;
   Standard_Boolean IsByLayer = Standard_False;
@@ -386,7 +387,7 @@ static void StatAssembly(const TDF_Label L,
     {
       Handle(TColStd_HSequenceOfExtendedString) aLayerS;
       LTool->GetLayers(L, aLayerS);
-      // Currently for DXF pnly, thus
+      // Currently for DXF only, thus
       // only 1 Layer should be.
       if(aLayerS->Length() == 1)
       {
@@ -428,14 +429,29 @@ static void StatAssembly(const TDF_Label L,
     }
     NbShapesWithLayer++;
   }
-  if(PrintStructMode) di<<"\n";
-  
+
+  TDF_Label aVMat;
+  if (VMTool->GetShapeMaterial(L, aVMat))
+  {
+    if (PrintStructMode) {
+      di << "VisMaterial(";
+      Handle(TDataStd_Name) aNodeName;
+      if (aVMat.FindAttribute(TDataStd_Name::GetID(), aNodeName))
+      {
+        di << "\"" << aNodeName->Get() << "\"";
+      }
+      di << ") ";
+    }
+    NbShapesWithVisMaterial++;
+  }
+  if (PrintStructMode) di << "\n";
+
   HAI->SetValue(level, HAI->Value(level)+1 );
   if(L.HasChild()) {
     for(Standard_Integer i=1; i<=L.NbChildren(); i++) {
       StatAssembly(L.FindChild(i), level+1, HAI, NbCentroidProp, NbVolumeProp,
                    NbAreaProp, NbShapesWithName, NbShapesWithColor,
-                   NbShapesWithLayer, aDoc, PrintStructMode, di);
+                   NbShapesWithLayer, NbShapesWithVisMaterial, aDoc, PrintStructMode, di);
     }
   }
 
@@ -465,14 +481,14 @@ static Standard_Integer statdoc (Draw_Interpretor& di, Standard_Integer argc, co
   if(PrintStructMode) di<<"\nStructure of shapes in the document:\n";
   Standard_Integer level=0;
   Standard_Integer NbCentroidProp=0, NbVolumeProp=0, NbAreaProp=0;
-  Standard_Integer NbShapesWithName=0, NbShapesWithColor=0, NbShapesWithLayer=0;
+  Standard_Integer NbShapesWithName=0, NbShapesWithColor=0, NbShapesWithLayer=0, NbShapesWithVisMaterial = 0;
   Handle(TColStd_HArray1OfInteger) HAI = new TColStd_HArray1OfInteger(0,20);
   Standard_Integer i=0;
   for(i=0; i<=20; i++) HAI->SetValue(i,0);
   for(i=1; i<=SeqLabels.Length(); i++) {
     StatAssembly(SeqLabels.Value(i), level, HAI, NbCentroidProp, NbVolumeProp,
                  NbAreaProp, NbShapesWithName, NbShapesWithColor,
-                 NbShapesWithLayer, Doc, PrintStructMode, di);
+                 NbShapesWithLayer, NbShapesWithVisMaterial, Doc, PrintStructMode, di);
   }
   Standard_Integer NbLabelsShape = 0;
   di<<"\nStatistis of shapes in the document:\n";
@@ -486,6 +502,7 @@ static Standard_Integer statdoc (Draw_Interpretor& di, Standard_Integer argc, co
   di<<"Number of labels with name = "<<NbShapesWithName<<"\n";
   di<<"Number of labels with color link = "<<NbShapesWithColor<<"\n";
   di<<"Number of labels with layer link = "<<NbShapesWithLayer<<"\n";
+  di << "Number of labels with vis material link = " << NbShapesWithVisMaterial << "\n";
 
   di<<"\nStatistis of Props in the document:\n";
   di<<"Number of Centroid Props = "<<NbCentroidProp<<"\n";
@@ -518,6 +535,23 @@ static Standard_Integer statdoc (Draw_Interpretor& di, Standard_Integer argc, co
       di << "\"" << layerName << "\" ";
     }
     di<<"\n";
+  }
+
+  Handle(XCAFDoc_VisMaterialTool) VMTool = XCAFDoc_DocumentTool::VisMaterialTool(Doc->Main());
+  TDF_LabelSequence aVMats;
+  VMTool->GetMaterials(aVMats);
+  di << "\nNumber of vis materials = " << aVMats.Length() << "\n";
+  if (!aVMats.IsEmpty())
+  {
+    for (TDF_LabelSequence::Iterator aVMIter(aVMats); aVMIter.More(); aVMIter.Next())
+    {
+      Handle(TDataStd_Name) aNodeName;
+      if (aVMIter.Value().FindAttribute(TDataStd_Name::GetID(), aNodeName))
+      {
+        di << "\"" << aNodeName->Get() << "\" ";
+      }
+    }
+    di << "\n";
   }
 
   di<<"\n";

@@ -130,7 +130,9 @@ Standard_Boolean BRepClass3d_SolidExplorer::FindAPointInTheFace
 
     T.Normalize();
     P.SetCoord (P.X() + TolInit * T.X(), P.Y() + TolInit * T.Y());
+// clang-format off
     FClassifier.Reset (gp_Lin2d (P, T), ParamInit, RealEpsilon()); //-- Length and Tolerance #######
+// clang-format on
 
     TopExp_Explorer otherfaceexplorer;
     Standard_Integer aNbEdges = 0;
@@ -441,7 +443,7 @@ Standard_Integer BRepClass3d_SolidExplorer::OtherSegment(const gp_Pnt& P,
                                                          gp_Lin& L, 
                                                          Standard_Real& _Par) 
 {
-  const Standard_Real TolU = Precision::PConfusion();
+  constexpr Standard_Real TolU = Precision::PConfusion();
   const Standard_Real TolV = TolU;
 
   TopoDS_Face         face;
@@ -500,7 +502,7 @@ Standard_Integer BRepClass3d_SolidExplorer::OtherSegment(const gp_Pnt& P,
       face.Orientation(TopAbs_FORWARD);
       //
       //avoid process faces from uncorrected shells
-      const Standard_Real eps = Precision::PConfusion();
+      constexpr Standard_Real eps = Precision::PConfusion();
       Standard_Real epsU = Max(eps * Max(Abs(U2), Abs(U1)), eps);
       Standard_Real epsV = Max(eps * Max(Abs(V2), Abs(V1)), eps);
       if( Abs (U2 - U1) < epsU || Abs(V2 - V1) < epsV) {

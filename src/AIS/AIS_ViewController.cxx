@@ -843,6 +843,7 @@ bool AIS_ViewController::UpdateMouseButtons (const Graphic3d_Vec2i& thePoint,
         }
         case AIS_MouseGesture_Zoom:
         case AIS_MouseGesture_ZoomWindow:
+        case AIS_MouseGesture_ZoomVertical:
         {
           if (!myToAllowZooming)
           {
@@ -1043,6 +1044,7 @@ bool AIS_ViewController::UpdateMousePosition (const Graphic3d_Vec2i& thePoint,
       break;
     }
     case AIS_MouseGesture_Zoom:
+    case AIS_MouseGesture_ZoomVertical:
     {
       if (!myToAllowZooming)
       {
@@ -1051,15 +1053,20 @@ bool AIS_ViewController::UpdateMousePosition (const Graphic3d_Vec2i& thePoint,
       const double aZoomTol = theIsEmulated
                             ? double(myTouchToleranceScale) * myTouchZoomThresholdPx
                             : 0.0;
-      if (double (Abs (aDelta.x())) > aZoomTol)
+      const double aScrollDelta = myMouseActiveGesture == AIS_MouseGesture_Zoom
+                                ? aDelta.x()
+                                : aDelta.y();
+      if (Abs (aScrollDelta) > aZoomTol)
       {
-        UpdateZoom (Aspect_ScrollDelta (aDelta.x()));
+        if (UpdateZoom (Aspect_ScrollDelta (aScrollDelta)))
+        {
+          toUpdateView = true;
+        }
 
         myUI.Dragging.ToMove  = true;
         myUI.Dragging.PointTo = thePoint;
 
         myMouseProgressPoint = thePoint;
-        toUpdateView = true;
       }
       break;
     }
@@ -1518,7 +1525,9 @@ void AIS_ViewController::handlePanning (const Handle(V3d_View)& theView)
   const gp_Dir& aDir = aCam->Direction();
   const gp_Ax3 aCameraCS (aCam->Center(), aDir.Reversed(), aDir ^ aCam->Up());
   const gp_XYZ anEyeToPnt = myPanPnt3d.XYZ() - aCam->Eye().XYZ();
+// clang-format off
   const gp_Pnt aViewDims = aCam->ViewDimensions (anEyeToPnt.Dot (aCam->Direction().XYZ())); // view dimensions at 3D point
+// clang-format on
   const Graphic3d_Vec2d aDxy (-aViewDims.X() * myGL.Panning.Delta.x() / double(aWinSize.x()),
                               -aViewDims.X() * myGL.Panning.Delta.y() / double(aWinSize.x()));
 
@@ -3494,7 +3503,9 @@ void AIS_ViewController::HandleViewEvents (const Handle(AIS_InteractiveContext)&
   }
   handleMoveTo (theCtx, theView);
   handleCameraActions (theCtx, theView, aWalk);
+// clang-format off
   theView->View()->SynchronizeXRPosedToBaseCamera(); // handleCameraActions() may modify posed camera position - copy this modifications also to the base camera
+// clang-format on
   handleXRPresentations (theCtx, theView);
 
   handleViewRedraw (theCtx, theView);

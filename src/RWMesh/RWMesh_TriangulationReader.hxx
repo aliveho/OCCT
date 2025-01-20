@@ -143,9 +143,9 @@ protected:
 protected: //! @name interface for filling triangulation data
 
   //! Resizes array of position nodes to specified size.
-  //! @param theMesh [in] triangulation to be modified
-  //! @param theNbNodes [in] nodes number
-  //! @param theToCopyData [in] copy old nodes into new array
+  //! @param[in] theMesh  triangulation to be modified
+  //! @param[in] theNbNodes  nodes number
+  //! @param[in] theToCopyData  copy old nodes into new array
   //! @return TRUE in case of success operation
   virtual bool setNbPositionNodes (const Handle(Poly_Triangulation)& theMesh,
                                    Standard_Integer theNbNodes,
@@ -160,9 +160,9 @@ protected: //! @name interface for filling triangulation data
   }
 
   //! Sets node position.
-  //! @param theMesh [in] triangulation to be modified
-  //! @param theIndex [in] node index starting from 1
-  //! @param thePnt [in] node position
+  //! @param[in] theMesh  triangulation to be modified
+  //! @param[in] theIndex  node index starting from 1
+  //! @param[in] thePnt  node position
   virtual void setNodePosition (const Handle(Poly_Triangulation)& theMesh,
                                 Standard_Integer theIndex,
                                 const gp_Pnt& thePnt) const
@@ -171,8 +171,8 @@ protected: //! @name interface for filling triangulation data
   }
 
   //! Resizes array of UV nodes to specified size.
-  //! @param theMesh [in] triangulation to be modified
-  //! @param theNbNodes [in] nodes number
+  //! @param[in] theMesh  triangulation to be modified
+  //! @param[in] theNbNodes  nodes number
   //! @return TRUE in case of success operation
   virtual bool setNbUVNodes (const Handle(Poly_Triangulation)& theMesh,
                              Standard_Integer theNbNodes) const
@@ -187,9 +187,9 @@ protected: //! @name interface for filling triangulation data
   }
 
   //! Sets node UV texture coordinates.
-  //! @param theMesh [in] triangulation to be modified
-  //! @param theIndex [in] node index starting from 1
-  //! @param theUV [in] node UV coordinates
+  //! @param[in] theMesh  triangulation to be modified
+  //! @param[in] theIndex  node index starting from 1
+  //! @param[in] theUV  node UV coordinates
   virtual void setNodeUV (const Handle(Poly_Triangulation)& theMesh,
                           Standard_Integer theIndex,
                           const gp_Pnt2d& theUV) const
@@ -198,8 +198,8 @@ protected: //! @name interface for filling triangulation data
   }
 
   //! Resizes array of nodes normals to specified size.
-  //! @param theMesh [in] triangulation to be modified
-  //! @param theNbNodes [in] nodes number
+  //! @param[in] theMesh  triangulation to be modified
+  //! @param[in] theNbNodes  nodes number
   //! @return TRUE in case of success operation
   virtual bool setNbNormalNodes (const Handle(Poly_Triangulation)& theMesh,
                                  Standard_Integer theNbNodes) const
@@ -214,7 +214,7 @@ protected: //! @name interface for filling triangulation data
   }
 
   //! Sets node normal.
-  //! @param theMesh [in] triangulation to be modified
+  //! @param[in] theMesh  triangulation to be modified
   //! @param theIndex  node index starting from 1
   //! @param theNormal node normal vector
   virtual void setNodeNormal (const Handle(Poly_Triangulation)& theMesh,
@@ -225,9 +225,9 @@ protected: //! @name interface for filling triangulation data
   }
 
   //! Resizes array of triangles to specified size.
-  //! @param theMesh [in] triangulation to be modified
-  //! @param theNbTris [in] elements number
-  //! @param theToCopyData [in] copy old triangles into new array
+  //! @param[in] theMesh  triangulation to be modified
+  //! @param[in] theNbTris  elements number
+  //! @param[in] theToCopyData  copy old triangles into new array
   //! @return TRUE in case of success operation
   virtual bool setNbTriangles (const Handle(Poly_Triangulation)& theMesh,
                                Standard_Integer theNbTris,
@@ -242,7 +242,7 @@ protected: //! @name interface for filling triangulation data
   }
 
   //! Adds triangle element.
-  //! @param theMesh [in] triangulation to be modified
+  //! @param[in] theMesh  triangulation to be modified
   //! @param theIndex    triangle index starting from 1
   //! @param theTriangle triangle nodes starting from 1
   //! @return 0 if node indexes are out of range,
@@ -272,12 +272,14 @@ protected: //! @name interface for filling triangulation data
 protected:
 
   RWMesh_CoordinateSystemConverter myCoordSysConverter;    //!< coordinate system converter
+// clang-format off
   TCollection_AsciiString          myFileName;             //!< file name to use during message printing
   mutable Standard_Mutex           myMutex;                //!< internal mutex to collect nodes/triangles statistic
   mutable LoadingStatistic*        myLoadingStatistic;     //!< statistic of loaded triangulation
   Standard_Boolean                 myIsDoublePrecision;    //!< flag to fill in triangulation using single or double precision
   Standard_Boolean                 myToSkipDegenerateTris; //!< flag to skip degenerate triangles during loading, FALSE by default
   Standard_Boolean                 myToPrintDebugMessages; //!< flag to print additional debug information
+// clang-format on
 };
 
 #endif // _RWMesh_TriangulationReader_HeaderFile

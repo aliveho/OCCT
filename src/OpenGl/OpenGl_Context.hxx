@@ -243,10 +243,10 @@ public:
   //!   aGlCtx->Init ((Aspect_Drawable )theXWindow, (Aspect_Display )theXDisp,  (Aspect_RenderingContext )theGlxCtx);
   //! @endcode
   //!
-  //! @param theSurface [in] surface / window          (EGLSurface | HWND  | GLXDrawable/Window)
-  //! @param theDisplay [in] display or device context (EGLDisplay | HDC   | Display*)
-  //! @param theContext [in] rendering context         (EGLContext | HGLRC | GLXContext | EAGLContext* | NSOpenGLContext*)
-  //! @param theIsCoreProfile [in] flag indicating that passed GL rendering context has been created with Core Profile
+  //! @param[in] theSurface  surface / window          (EGLSurface | HWND  | GLXDrawable/Window)
+  //! @param[in] theDisplay  display or device context (EGLDisplay | HDC   | Display*)
+  //! @param[in] theContext  rendering context         (EGLContext | HGLRC | GLXContext | EAGLContext* | NSOpenGLContext*)
+  //! @param[in] theIsCoreProfile  flag indicating that passed GL rendering context has been created with Core Profile
   //! @return false if OpenGL context can not be bound to specified surface
   Standard_EXPORT Standard_Boolean Init (const Aspect_Drawable         theSurface,
                                          const Aspect_Display          theDisplay,
@@ -296,9 +296,9 @@ public:
   //! Pointer to function retrieved from library is statically casted
   //! to requested type - there no way to check real signature of exported function.
   //! The context should be bound before call.
-  //! @param theLastFailFuncName [out] set to theFuncName in case of failure, unmodified on success
-  //! @param theFuncName [in] function name to find
-  //! @param theFuncPtr [out] retrieved function pointer
+  //! @param[out] theLastFailFuncName  set to theFuncName in case of failure, unmodified on success
+  //! @param[in] theFuncName  function name to find
+  //! @param[out] theFuncPtr  retrieved function pointer
   //! @return TRUE on success
   template <typename FuncType_t>
   Standard_Boolean FindProcVerbose (const char*& theLastFailFuncName,
@@ -834,8 +834,8 @@ public: //! @name methods to alter or retrieve current state
   }
 
   //! Bind specified texture set to current context, or unbind previous one when NULL specified.
-  //! @param theTextures [in] texture set to bind
-  //! @param theProgram  [in] program attributes; when not NULL,
+  //! @param[in] theTextures  texture set to bind
+  //! @param[in] theProgram   program attributes; when not NULL,
   //!                         mock textures will be bound to texture units expected by GLSL program, but undefined by texture set
   //! @return previous texture set
   Standard_EXPORT Handle(OpenGl_TextureSet) BindTextures (const Handle(OpenGl_TextureSet)& theTextures,
@@ -897,8 +897,8 @@ public: //! @name methods to alter or retrieve current state
   Standard_EXPORT void SetPointSpriteOrigin();
 
   //! Setup texture matrix to active GLSL program or to FFP global state using glMatrixMode (GL_TEXTURE).
-  //! @param theParams    [in] texture parameters
-  //! @param theIsTopDown [in] texture top-down flag
+  //! @param[in] theParams     texture parameters
+  //! @param[in] theIsTopDown  texture top-down flag
   Standard_EXPORT void SetTextureMatrix (const Handle(Graphic3d_TextureParams)& theParams,
                                          const Standard_Boolean theIsTopDown);
 
@@ -1025,6 +1025,7 @@ public: //! @name core profiles
   OpenGl_GlCore45*     core45;     //!< OpenGL 4.5 core profile
   OpenGl_GlCore46*     core46;     //!< OpenGL 4.6 core profile
 
+// clang-format off
   OpenGl_GlCore15*     core15fwd;  //!< obsolete entry left for code portability; core15 should be used instead
   OpenGl_GlCore20*     core20fwd;  //!< obsolete entry left for code portability; core20 should be used instead
 
@@ -1070,6 +1071,7 @@ public: //! @name extensions
   OpenGl_ExtGS*          extGS;              //!< GL_EXT_geometry_shader4
   Standard_Boolean       extBgra;            //!< GL_EXT_bgra or GL_EXT_texture_format_BGRA8888 on OpenGL ES
   Standard_Boolean       extTexR16;          //!< GL_EXT_texture_norm16 on OpenGL ES; always available on desktop
+// clang-format on
   Standard_Boolean       extAnis;            //!< GL_EXT_texture_filter_anisotropic
   Standard_Boolean       extPDS;             //!< GL_EXT_packed_depth_stencil
   Standard_Boolean       atiMem;             //!< GL_ATI_meminfo
@@ -1087,6 +1089,7 @@ private: // system-dependent fields
 
   Aspect_Drawable         myWindow;   //!< surface           EGLSurface | HWND  | GLXDrawable
   Aspect_Display          myDisplay;  //!< display           EGLDisplay | HDC   | Display*
+// clang-format off
   Aspect_RenderingContext myGContext; //!< rendering context EGLContext | HGLRC | GLXContext | EAGLContext* | NSOpenGLContext*
 
 private: // context info
@@ -1095,6 +1098,7 @@ private: // context info
   typedef NCollection_Shared< NCollection_List<Handle(OpenGl_Resource)> > OpenGl_ResourcesStack;
 
   Handle(OpenGl_ResourcesMap)    mySharedResources; //!< shared resources with unique identification key
+// clang-format on
   Handle(OpenGl_DelayReleaseMap) myDelayed;         //!< shared resources for delayed release
   Handle(OpenGl_ResourcesStack)  myUnusedResources; //!< stack of resources for delayed clean up
 
@@ -1110,7 +1114,9 @@ private: // context info
   Standard_Integer myTexClamp;             //!< either GL_CLAMP_TO_EDGE (1.2+) or GL_CLAMP (1.1)
   Standard_Integer myMaxTexDim;            //!< value for GL_MAX_TEXTURE_SIZE
   Standard_Integer myMaxTexCombined;       //!< value for GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS
+// clang-format off
   Standard_Integer myMaxTexUnitsFFP;       //!< value for GL_MAX_TEXTURE_UNITS (fixed-function pipeline only)
+// clang-format on
   Standard_Integer myMaxDumpSizeX;         //!< maximum FBO width  for image dump
   Standard_Integer myMaxDumpSizeY;         //!< maximum FBO height for image dump
   Standard_Integer myMaxClipPlanes;        //!< value for GL_MAX_CLIP_PLANES
@@ -1124,6 +1130,7 @@ private: // context info
   Standard_Boolean myHasMsaaTextures;      //!< context supports MSAA textures
   Standard_Boolean myIsGlNormalizeEnabled; //!< GL_NORMALIZE flag
                                            //!< Used to tell OpenGl that normals should be normalized
+// clang-format off
   Graphic3d_TextureUnit mySpriteTexUnit;   //!< sampler2D occSamplerPointSprite, texture unit for point sprite texture
 
   Standard_Boolean myHasRayTracing;                 //! indicates whether ray tracing mode is supported
@@ -1140,6 +1147,7 @@ private: // context info
 
   Graphic3d_TextureUnit myDepthPeelingDepthTexUnit;      //!< sampler2D occDepthPeelingDepth, texture unit for Depth Peeling lookups
   Graphic3d_TextureUnit myDepthPeelingFrontColorTexUnit; //!< sampler2D occDepthPeelingFrontColor, texture unit for Depth Peeling lookups
+// clang-format on
 
   Handle(OpenGl_ShaderManager) myShaderManager; //! support object for managing shader programs
 
@@ -1152,6 +1160,7 @@ private: //! @name fields tracking current state
                                                    //!< currently active sampler objects
   Standard_Integer              myActiveMockTextures; //!< currently active mock sampler objects
   Handle(OpenGl_FrameBuffer)    myDefaultFbo;      //!< default Frame Buffer Object
+// clang-format off
   Handle(OpenGl_LineAttributes) myHatchStyles;     //!< resource holding predefined hatch styles patterns
   Standard_Integer              myActiveHatchType; //!< currently activated type of polygon hatch
   Standard_Boolean              myHatchIsEnabled;  //!< current enabled state of polygon hatching rasterization
@@ -1186,6 +1195,7 @@ private: //! @name fields tracking current state
   Standard_ShortReal            myRenderScale;     //!< scaling factor for rendering resolution
   Standard_ShortReal            myRenderScaleInv;  //!< scaling factor for rendering resolution (inverted value)
   OpenGl_Material               myMaterial;        //!< current front/back material state (cached to reduce GL context updates)
+// clang-format on
 
 private:
 

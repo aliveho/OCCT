@@ -135,7 +135,7 @@ Standard_Boolean FUN_computeLIFfaces2d(const TopOpeBRepBuild_Builder& BU,
 				       const TopoDS_Edge& E, 
 				       TopOpeBRepDS_PDataStructure& pDS2d)
 // purpose : compute new face/face interferences F FTRA,
-//  {I = (T(F),ES,FTRA)} / Fsdm F and ES interfers with E which has splits ON
+//  {I = (T(F),ES,FTRA)} / Fsdm F and ES interferes with E which has splits ON
 //  E is edge of F
 { 
   const TopOpeBRepDS_DataStructure& BDS = BU.DataStructure()->DS(); 
@@ -867,8 +867,10 @@ static void FUN_samgeomori(const TopOpeBRepDS_DataStructure& BDS, const Standard
       TopoDS_Shape newE = EOR;
        
       if      (newO)                 newE.Orientation(oEinF);// xpu060598  
+// clang-format off
       else if (Oinref == FORREVOPPO) newE.Orientation(TopAbs_INTERNAL);// xpu120898 (PRO14785 : e36 shared by f34 & f39,
                                                                        // faces sdm with f16)
+// clang-format on
       else                           newE.Orientation(neworiE); 
 #ifdef OCCT_DEBUG
       if(tSPS){

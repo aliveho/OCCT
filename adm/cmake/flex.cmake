@@ -15,7 +15,7 @@ if (NOT FLEX_INCLUDE_DIR OR NOT EXISTS "${FLEX_INCLUDE_DIR}")
 endif()
 
 # Add paths to 3rdparty subfolders containing name "flex" to CMAKE_PROGRAM_PATH and 
-# CMAKE_INCLUDE_PATH variables to make these paths searhed by find_package
+# CMAKE_INCLUDE_PATH variables to make these paths searched by find_package
 if (3RDPARTY_DIR)
   file (GLOB FLEX_PATHS LIST_DIRECTORIES true "${3RDPARTY_DIR}/*flex*")
   foreach (candidate_path ${FLEX_PATHS})
@@ -30,4 +30,14 @@ find_package (FLEX 2.6.4)
 
 if (NOT FLEX_FOUND OR NOT FLEX_INCLUDE_DIR OR NOT EXISTS "${FLEX_INCLUDE_DIR}/FlexLexer.h")
   list (APPEND 3RDPARTY_NOT_INCLUDED FLEX_INCLUDE_DIR)
+endif()
+
+# remove old general version of FlexLexer
+if (EXISTS ${CMAKE_SOURCE_DIR}/${RELATIVE_SOURCES_DIR}/FlexLexer/FlexLexer.h)
+  message (STATUS "Info: remove old FLEX header file: ${CMAKE_SOURCE_DIR}/src/FlexLexer/FlexLexer.h")
+  file(REMOVE ${CMAKE_SOURCE_DIR}/src/FlexLexer/FlexLexer.h)
+endif()
+# install copy of FlexLexer.h locally to allow further building without flex
+if (FLEX_INCLUDE_DIR AND EXISTS "${FLEX_INCLUDE_DIR}/FlexLexer.h")
+  configure_file("${FLEX_INCLUDE_DIR}/FlexLexer.h" "${CMAKE_SOURCE_DIR}/src/FlexLexer/FlexLexer.h" @ONLY NEWLINE_STYLE LF)
 endif()

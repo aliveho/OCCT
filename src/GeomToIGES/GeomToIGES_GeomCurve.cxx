@@ -194,7 +194,7 @@ static Standard_Boolean ArePolesPlanar (const TColgp_Array1OfPnt& Poles,
   for ( i = 1; i < Poles.Length(); i++) 
     Normal += Poles ( i ).XYZ() ^ Poles ( i + 1 ).XYZ();
 
-  Standard_Real tol = Precision::Confusion();
+  constexpr Standard_Real tol = Precision::Confusion();
   Standard_Real nrm = Normal.Modulus();
   if ( nrm < tol ) {
     Normal.SetCoord ( 0, 0, 1 );
@@ -839,7 +839,9 @@ Handle(IGESData_IGESEntity) GeomToIGES_GeomCurve::TransferCurve
   
   OffsetC->Init( BaseCurve, 1,voident, 0, 0, (start->Offset()/GetUnit()), 0.,
 		(start->Offset()/GetUnit()), 0.,
+// clang-format off
 		start->Direction().XYZ().Reversed(), U1, U2);  //%11 pdn 12.01.99 // valeur (0,0,1) pour l'instant   
+// clang-format on
   
   res = OffsetC;  
   return res;

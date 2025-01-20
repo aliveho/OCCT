@@ -297,17 +297,19 @@ protected:
   void bindNodeShape (TopoDS_Shape& theShape,
                       const TopLoc_Location& theLoc,
                       const TCollection_AsciiString& theNodeId,
-                      const RWGltf_JsonValue* theUserName)
+                      const RWGltf_JsonValue* theUserName,
+                      const Handle(TDataStd_NamedData)& theExtras)
   {
-    bindNamedShape (theShape, ShapeMapGroup_Nodes, theLoc, theNodeId, theUserName);
+    bindNamedShape (theShape, ShapeMapGroup_Nodes, theLoc, theNodeId, theUserName, theExtras);
   }
 
   //! Bind name attribute.
   void bindMeshShape (TopoDS_Shape& theShape,
                       const TCollection_AsciiString& theMeshId,
-                      const RWGltf_JsonValue* theUserName)
+                      const RWGltf_JsonValue* theUserName,
+                      const Handle(TDataStd_NamedData)& theExtras)
   {
-    bindNamedShape (theShape, ShapeMapGroup_Meshes, TopLoc_Location(), theMeshId, theUserName);
+    bindNamedShape (theShape, ShapeMapGroup_Meshes, TopLoc_Location(), theMeshId, theUserName, theExtras);
   }
 
   //! Find named shape.
@@ -329,7 +331,8 @@ protected:
                                        ShapeMapGroup theGroup,
                                        const TopLoc_Location& theLoc,
                                        const TCollection_AsciiString& theId,
-                                       const RWGltf_JsonValue* theUserName);
+                                       const RWGltf_JsonValue* theUserName,
+                                       const Handle(TDataStd_NamedData)& theExtras);
 
   //! Find named shape.
   bool findNamedShape (TopoDS_Shape& theShape,
@@ -403,19 +406,47 @@ protected:
     const RWGltf_JsonValue* myRoot;
 
   };
+
+private:
+  //! Parse transformation matrix of the node.
+  //! @param theSceneNodeId Name of the node. Used only for printing messages.
+  //! @param theMatrixVal Json value containing transformation matrix.
+  //! @param theResult TopLoc_Location object where result of parsing will be written.
+  //! @param If true - parsing was successful, transformation is written into @p theResult.
+  //!        If true - failed to parse, @p theResult is unchanged.
+  bool parseTransformationMatrix(const TCollection_AsciiString& theSceneNodeId,
+                                 const RWGltf_JsonValue& theMatrixVal,
+                                 TopLoc_Location& theResult) const;
+
+  //! Parse transformation components of the node.
+  //! @param theSceneNodeId Name of the node. Used only for printing messages.
+  //! @param theRotationVal Json value containing rotation component of transformation.
+  //!        May be null in which case it is ignored.
+  //! @param theScaleVal Json value containing scale component of transformation.
+  //!        May be null in which case it is ignored.
+  //! @param theTranslationVal Json value containing translation component of transformation.
+  //!        May be null in which case it is ignored.
+  //! @param theResult TopLoc_Location object where result of parsing will be written.
+  //! @param If true - parsing was successful, transformation is written into @p theResult.
+  //!        If true - failed to parse, @p theResult is unchanged.
+  bool parseTransformationComponents(const TCollection_AsciiString& theSceneNodeId,
+                                     const RWGltf_JsonValue* theRotationVal,
+                                     const RWGltf_JsonValue* theScaleVal,
+                                     const RWGltf_JsonValue* theTranslationVal,
+                                     TopLoc_Location& theResult) const;
 #endif
 protected:
-
   //! Print message about invalid glTF syntax.
-  void reportGltfSyntaxProblem (const TCollection_AsciiString& theMsg, Message_Gravity theGravity);
+  void reportGltfSyntaxProblem (const TCollection_AsciiString& theMsg, Message_Gravity theGravity) const;
 
 protected:
-
   TopTools_SequenceOfShape*        myRootShapes;    //!< sequence of result root shapes
   RWMesh_NodeAttributeMap*         myAttribMap;     //!< shape attributes
   NCollection_IndexedMap<TCollection_AsciiString>*
                                    myExternalFiles; //!< list of external file references
+// clang-format off
   RWMesh_CoordinateSystemConverter myCSTrsf;        //!< transformation from glTF to OCCT coordinate system
+// clang-format on
   TColStd_IndexedDataMapOfStringString* myMetadata; //!< file metadata
 
   NCollection_DataMap<TCollection_AsciiString, Handle(RWGltf_MaterialMetallicRoughness)> myMaterialsPbr;
@@ -435,10 +466,12 @@ protected:
   bool                      myIsBinary;       //!< binary document
   bool                      myIsGltf1;        //!< obsolete glTF 1.0 version format
   bool                      myToSkipEmptyNodes; //!< ignore nodes without Geometry
+// clang-format off
   bool                      myToLoadAllScenes;  //!< flag to load all scenes in the document, FALSE by default
   bool                      myUseMeshNameAsFallback; //!< flag to use Mesh name in case if Node name is empty, TRUE by default
   bool                      myToProbeHeader;  //!< flag to probe header without full reading, FALSE by default
   bool                      myToReadAssetExtras; //!< flag to translate asset.extras into metadata, TRUE by default
+// clang-format on
 
 #ifdef HAVE_RAPIDJSON
   GltfElementMap myGltfRoots[RWGltf_GltfRootElement_NB]; //!< glTF format root elements

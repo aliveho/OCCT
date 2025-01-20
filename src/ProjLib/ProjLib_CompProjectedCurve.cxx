@@ -729,7 +729,7 @@ void ProjLib_CompProjectedCurve::Init()
   Standard_Boolean FromLastU = Standard_False,
                    isSplitsComputed = Standard_False;
 
-  const Standard_Real aTolExt = Precision::PConfusion();
+  constexpr Standard_Real aTolExt = Precision::PConfusion();
   Extrema_ExtCS CExt (*myCurve, *mySurface, aTolExt, aTolExt);
   if (CExt.IsDone() && CExt.NbExt())
   {
@@ -2322,7 +2322,9 @@ void FindSplitPoint(SplitDS &theSplitDS,
   Extrema_ExtCC anExtCC;
   anExtCC.SetCurve(1, *theSplitDS.myExtCCCurve1);
   anExtCC.SetCurve(2, *theSplitDS.myCurve);
+// clang-format off
   anExtCC.SetSingleSolutionFlag (Standard_True); // Search only one solution since multiple invocations are needed.
+// clang-format on
   anExtCC.SetRange(1, 0, theSplitDS.myExtCCLast2DParam);
   anExtCC.SetRange(2, theMinParam, theMaxParam);
   anExtCC.Perform();

@@ -878,7 +878,7 @@ static Standard_Integer gbounding(Draw_Interpretor& di,Standard_Integer n,const 
     Standard_Boolean Is3d = Standard_True;
     Handle(Geom_Curve) C;
     Handle(Geom_Surface) S;
-    Handle_Geom2d_Curve C2d;
+    Handle(Geom2d_Curve) C2d;
     S = DrawTrSurf::GetSurface(a[1]);
     if (!S.IsNull())
     {
@@ -961,7 +961,7 @@ static Standard_Integer findplane(Draw_Interpretor& di,Standard_Integer n,const 
   if (a_plane_finder.Found()) {
     //std::cout << " a plane is found "   ;
     di << " a plane is found \n";
-    const Handle(Geom_Geometry)& aSurf = a_plane_finder.Plane(); // to avoid ambiguity
+    const Handle(Geom_Geometry) aSurf = a_plane_finder.Plane(); // to avoid ambiguity
     DrawTrSurf::Set(a[2],aSurf) ;
   }
   return 0 ;

@@ -108,7 +108,13 @@ public:
   Standard_EXPORT void RemoveBuilderById (const Standard_Integer Id);
   
   //! Finds builder by its type the string represents
+  Standard_DEPRECATED("This method will be removed right after 7.9 release. \
+Use FindBuilder(const Handle(Standard_Type)&) instead \
+or directly iterate under sequence of builders.")
   Standard_EXPORT Handle(MeshVS_PrsBuilder) FindBuilder (const Standard_CString TypeString) const;
+
+  //! Finds builder by its type the type represents
+  Standard_EXPORT Handle(MeshVS_PrsBuilder) FindBuilder (const Handle(Standard_Type)& TypeString) const;
   
   //! Returns map of owners.
   Standard_EXPORT const MeshVS_DataMapOfIntegerOwner& GetOwnerMaps (const Standard_Boolean IsElement);
@@ -183,9 +189,9 @@ friend class MeshVS_PrsBuilder;
 protected:
 
   //! Stores all vertices that belong to one of the faces to the given map
-  //! @param theAllElements [in] the map of all mesh elements
-  //! @param theNbMaxFaceNodes [in] the maximum amount of nodes per face, retrieved from drawer
-  //! @param theSharedNodes [out] the result map of all vertices that belong to one face at least
+  //! @param[in] theAllElements  the map of all mesh elements
+  //! @param[in] theNbMaxFaceNodes  the maximum amount of nodes per face, retrieved from drawer
+  //! @param[out] theSharedNodes  the result map of all vertices that belong to one face at least
   Standard_EXPORT void scanFacesForSharedNodes (const TColStd_PackedMapOfInteger& theAllElements,
                                                 const Standard_Integer theNbMaxFaceNodes,
                                                 TColStd_PackedMapOfInteger& theSharedNodes) const;

@@ -149,9 +149,6 @@ Standard_Boolean Resource_Unicode::ConvertGBKToUnicode(const Standard_CString fr
         tostr.Insert(0, curext3);
         tostr.Insert(0, curext2);
         tostr.Insert(0, curext1);
-        gb1 = 0;
-        gb2 = 0;
-        gb3 = 0;
         return Standard_False;
       }
 
@@ -180,8 +177,6 @@ Standard_Boolean Resource_Unicode::ConvertGBKToUnicode(const Standard_CString fr
       TCollection_ExtendedString curext1(((char) gb2));
       tostr.Insert(0, curext2);
       tostr.Insert(0, curext1);
-      gb1 = 0;
-      gb2 = 0;
       return Standard_False;
     }
     else if (gb1 != 0x00)
@@ -309,8 +304,7 @@ Standard_Boolean Resource_Unicode::ConvertBig5ToUnicode(const Standard_CString f
             }
             else
             {
-              Standard_Utf32Char* aChar32 = new Standard_Utf32Char[1];
-              aChar32[0] = uni;
+              Standard_Utf32Char aChar32[] = {uni};
               NCollection_Utf32String aStr32(aChar32);
               NCollection_Utf16String aStr16 = aStr32.ToUtf16();
 
@@ -388,7 +382,6 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToSJIS(const TCollection_Extend
 	}
 	else {
 	  tostr[nbtrans] = '\0';
-	  nbtrans = maxsize-1;
 	  return Standard_False;
 	}
       }
@@ -398,7 +391,6 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToSJIS(const TCollection_Extend
       }
       if (nbtrans >= (maxsize - 1)) {
 	tostr[maxsize-1] = '\0';
-	finished = Standard_True;
 	return Standard_False;
       }
     }
@@ -437,7 +429,6 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToEUC(const TCollection_Extende
 	}
 	else {
 	  tostr[nbtrans-1] = '\0';
-	  nbtrans = maxsize-1;
 	  return Standard_False;
 	}
       }
@@ -447,7 +438,6 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToEUC(const TCollection_Extende
       }
       if (nbtrans >= (maxsize - 1)) {
 	tostr[maxsize-1] = '\0';
-	finished = Standard_True;
 	return Standard_False;
       }
     }
@@ -486,7 +476,6 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToGB(const TCollection_Extended
 	}
 	else {
 	  tostr[nbtrans-1] = '\0';
-	  nbtrans = maxsize-1;
 	  return Standard_False;
 	}
       }
@@ -496,7 +485,6 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToGB(const TCollection_Extended
       }
       if (nbtrans >= (maxsize - 1)) {
 	tostr[maxsize-1] = '\0';
-	finished = Standard_True;
 	return Standard_False;
       }
     }
@@ -535,7 +523,6 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToANSI(const TCollection_Extend
     }
     if (nbtrans >= (maxsize - 1)) {
       tostr[maxsize-1] = '\0';
-      finished = Standard_True;
       return Standard_False;
     }
   }

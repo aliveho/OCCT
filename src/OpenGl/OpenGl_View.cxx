@@ -520,12 +520,12 @@ Standard_Boolean OpenGl_View::BufferDump (Image_PixMap& theImage, const Graphic3
   const Handle(OpenGl_Context)& aCtx = myWorkspace->GetGlContext();
   if (theBufferType != Graphic3d_BT_RGB_RayTraceHdrLeft)
   {
-    return myWorkspace->BufferDump(myFBO, theImage, theBufferType);
+    return myWorkspace->BufferDump (myFBO, theImage, theBufferType);
   }
 
   if (!myRaytraceParameters.AdaptiveScreenSampling)
   {
-    return myWorkspace->BufferDump(myAccumFrames % 2 ? myRaytraceFBO2[0] : myRaytraceFBO1[0], theImage, theBufferType);
+    return myWorkspace->BufferDump (myAccumFrames % 2 ? myRaytraceFBO2[0] : myRaytraceFBO1[0], theImage, theBufferType);
   }
 
   if (aCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGLES)
@@ -570,6 +570,73 @@ Standard_Boolean OpenGl_View::BufferDump (Image_PixMap& theImage, const Graphic3
   }
 
   return true;
+}
+
+//=======================================================================
+//function : ShadowMapDump
+//purpose  :
+//=======================================================================
+Standard_Boolean OpenGl_View::ShadowMapDump (Image_PixMap& theImage, const TCollection_AsciiString& theLightName)
+{
+  if (!myShadowMaps->IsValid())
+  {
+    return Standard_False;
+  }
+
+  const Handle(OpenGl_Context)& aGlCtx = myWorkspace->GetGlContext();
+  for (Standard_Integer aShadowIter = 0; aShadowIter < myShadowMaps->Size(); ++aShadowIter)
+  {
+    Handle(OpenGl_ShadowMap)& aShadow = myShadowMaps->ChangeValue(aShadowIter);
+    if (!aShadow.IsNull() && aShadow->LightSource()->Name() == theLightName)
+    {
+      const Handle(OpenGl_FrameBuffer)& aShadowFbo = aShadow->FrameBuffer();
+      if (aShadowFbo->GetVPSizeX() == myRenderParams.ShadowMapResolution)
+      {
+        if ((Standard_Integer)theImage.Width() != aShadowFbo->GetVPSizeX() || (Standard_Integer)theImage.Height() != aShadowFbo->GetVPSizeY())
+        {
+          theImage.InitZero(Image_Format_GrayF, aShadowFbo->GetVPSizeX(), aShadowFbo->GetVPSizeY());
+        }
+        GLint aReadBufferPrev = GL_BACK;
+        // Bind FBO if used.
+        if (!aShadowFbo.IsNull() && aShadowFbo->IsValid())
+        {
+          aShadowFbo->BindBuffer (aGlCtx);
+        }
+        else if (aGlCtx->GraphicsLibrary() != Aspect_GraphicsLibrary_OpenGLES)
+        {
+          aGlCtx->core11fwd->glGetIntegerv (GL_READ_BUFFER, &aReadBufferPrev);
+          GLint aDrawBufferPrev = GL_BACK;
+          aGlCtx->core11fwd->glGetIntegerv (GL_DRAW_BUFFER, &aDrawBufferPrev);
+          aGlCtx->core11fwd->glReadBuffer (aDrawBufferPrev);
+        }
+        // Setup alignment.
+// clang-format off
+        const GLint anAligment = Min (GLint(theImage.MaxRowAligmentBytes()), 8); // limit to 8 bytes for OpenGL.
+// clang-format on
+        aGlCtx->core11fwd->glPixelStorei (GL_PACK_ALIGNMENT, anAligment);
+        // Read data.
+        aGlCtx->core11fwd->glReadPixels (0, 0, GLsizei(theImage.SizeX()), GLsizei(theImage.SizeY()), GL_DEPTH_COMPONENT, GL_FLOAT, theImage.ChangeData());
+        aGlCtx->core11fwd->glPixelStorei (GL_PACK_ALIGNMENT, 1);
+        if (aGlCtx->hasPackRowLength)
+        {
+          aGlCtx->core11fwd->glPixelStorei (GL_PACK_ROW_LENGTH, 0);
+        }
+        // Unbind FBO.
+        if (!aShadowFbo.IsNull() && aShadowFbo->IsValid())
+        {
+          aShadowFbo->UnbindBuffer (aGlCtx);
+        }
+        else if (aGlCtx->GraphicsLibrary() != Aspect_GraphicsLibrary_OpenGLES)
+        {
+          aGlCtx->core11fwd->glReadBuffer (aReadBufferPrev);
+        }
+        // Check for errors.
+        const bool hasErrors = aGlCtx->ResetErrors (true);
+        return !hasErrors;
+      }
+    }
+  }
+  return Standard_False;
 }
 
 // =======================================================================
@@ -2125,7 +2192,9 @@ void OpenGl_View::redraw (const Graphic3d_Camera::Projection theProjection,
   aCtx->core11fwd->glClearDepth (1.0);
 
   const OpenGl_Vec4 aBgColor = aCtx->Vec4FromQuantityColor (myBgColor);
+// clang-format off
   aCtx->SetColorMaskRGBA (NCollection_Vec4<bool> (true)); // force writes into all components, including alpha
+// clang-format on
   aCtx->core11fwd->glClearColor (aBgColor.r(), aBgColor.g(), aBgColor.b(), aCtx->caps->buffersOpaqueAlpha ? 1.0f : 0.0f);
   aCtx->core11fwd->glClear (toClear);
   aCtx->SetColorMask (true); // restore default alpha component write state
@@ -2250,7 +2319,9 @@ bool OpenGl_View::blitSubviews (const Graphic3d_Camera::Projection ,
       aCtx->SetFrameBufferSRGB (false);
     }
 
+// clang-format off
     Graphic3d_Vec2i aWinSize (aCtx->Viewport()[2], aCtx->Viewport()[3]); //aSubView->GlWindow()->PlatformWindow()->Dimensions();
+// clang-format on
     Graphic3d_Vec2i aSubViewSize = aChildFbo->GetVPSize();
     Graphic3d_Vec2i aSubViewPos  = aSubView->SubviewTopLeft();
     Graphic3d_Vec2i aDestSize    = aSubViewSize;
@@ -2583,7 +2654,7 @@ void OpenGl_View::renderStructs (Graphic3d_Camera::Projection theProjection,
       if (aCtx->arbFBOBlit != NULL)
       {
         // Render bottom OSD layer
-        myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_Bottom, theReadDrawFbo, theOitAccumFbo);
+        myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_Bottom, myZLayerTarget, theReadDrawFbo, theOitAccumFbo);
 
         const Standard_Integer aPrevFilter = myWorkspace->RenderFilter() & ~(Standard_Integer )(OpenGl_RenderFilter_NonRaytraceableOnly);
         myWorkspace->SetRenderFilter (aPrevFilter | OpenGl_RenderFilter_NonRaytraceableOnly);
@@ -2599,7 +2670,7 @@ void OpenGl_View::renderStructs (Graphic3d_Camera::Projection theProjection,
           }
 
           // Render non-polygonal elements in default layer
-          myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_RayTracable, theReadDrawFbo, theOitAccumFbo);
+          myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_RayTracable, myZLayerTarget, theReadDrawFbo, theOitAccumFbo);
         }
         myWorkspace->SetRenderFilter (aPrevFilter);
       }
@@ -2622,7 +2693,7 @@ void OpenGl_View::renderStructs (Graphic3d_Camera::Projection theProjection,
       raytrace (aSizeXY.x(), aSizeXY.y(), theProjection, theReadDrawFbo, aCtx);
 
       // Render upper (top and topmost) OpenGL layers
-      myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_Upper, theReadDrawFbo, theOitAccumFbo);
+      myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_Upper, myZLayerTarget, theReadDrawFbo, theOitAccumFbo);
     }
   }
 
@@ -2630,7 +2701,9 @@ void OpenGl_View::renderStructs (Graphic3d_Camera::Projection theProjection,
   // mode or in case of ray-tracing failure
   if (toRenderGL)
   {
-    myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_All, theReadDrawFbo, theOitAccumFbo);
+    // check if only a single layer is to be dumped
+    OpenGl_LayerFilter aFilter = myZLayerRedrawMode ? OpenGl_LF_Single : OpenGl_LF_All;
+    myZLayers.Render (myWorkspace, theToDrawImmediate, aFilter, myZLayerTarget, theReadDrawFbo, theOitAccumFbo);
 
     // Set flag that scene was redrawn by standard pipeline
     myWasRedrawnGL = Standard_True;
@@ -2815,7 +2888,9 @@ bool OpenGl_View::blitBuffers (OpenGl_FrameBuffer*    theReadFbo,
   const Standard_Integer aViewport[4] = { 0, 0, aDrawSizeX, aDrawSizeY };
   aCtx->ResizeViewport (aViewport);
 
+// clang-format off
   aCtx->SetColorMaskRGBA (NCollection_Vec4<bool> (true)); // force writes into all components, including alpha
+// clang-format on
   aCtx->core20fwd->glClearDepth (1.0);
   aCtx->core20fwd->glClearColor (0.0f, 0.0f, 0.0f, aCtx->caps->buffersOpaqueAlpha ? 1.0f : 0.0f);
   aCtx->core20fwd->glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

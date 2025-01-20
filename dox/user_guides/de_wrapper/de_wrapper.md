@@ -200,7 +200,7 @@ All registered providers are set to the map with information about its vendor an
 It is nesessary to register only one ConfigurationNode for all needed formats.
 ~~~~{.cpp}
 Handle(DE_Wrapper) aSession = DE_Wrapper::GlobalWrapper();
-Handle(DE_ConfigurationNode) aNode = new STEPCAFControl_ConfigurationNode();
+Handle(DE_ConfigurationNode) aNode = new DESTEP_ConfigurationNode();
 aSession->Bind(aNode);
 ~~~~
 @subsubsection occt_de_wrapper_3_3_2 Registering providers. DRAW Sample
@@ -212,11 +212,11 @@ pload XDE
 
 @subsubsection occt_de_wrapper_3_3_3 Realtime initialization. Code sample
 
-It is possible to change a paramater from code using a smart pointer.
+It is possible to change a parameter from code using a smart pointer.
 
 ~~~~{.cpp}
 // global variable
-static Handle(STEPCAFControl_ConfigurationNode) THE_STEP_NODE;
+static Handle(DESTEP_ConfigurationNode) THE_STEP_NODE;
 
 static Handle(DE_ConfigurationNode) RegisterStepNode()
 {
@@ -226,7 +226,7 @@ static Handle(DE_ConfigurationNode) RegisterStepNode()
     return THE_STEP_NODE;
   }
 
-  THE_STEP_NODE = new STEPCAFControl_ConfigurationNode();
+  THE_STEP_NODE = new DESTEP_ConfigurationNode();
   aSession->Bind(THE_STEP_NODE);
   return THE_STEP_NODE;
 }
@@ -239,7 +239,7 @@ THE_STEP_NODE->InternalParameters.ReadProps = false;
 
 @subsection occt_de_wrapper_3_4 Priority of Vendors
 
-DE session is able to work with several vendors with the same supported CAD format. To choose the preffered vendor for each format, use a special priority list.
+DE session is able to work with several vendors with the same supported CAD format. To choose the preferred vendor for each format, use a special priority list.
 
 If the high priority vendor's provider is not supported, a transfer operation is needed (write/read), then the next vendor will be chosen.
 
@@ -251,7 +251,7 @@ If the high priority vendor's provider is not supported, a transfer operation is
   TColStd_ListOfAsciiString aVendors;
   aVendors.Appends("OCC"); // high priority
   aVendors.Appends("DTK");
-  // Flag to disable not choosen vendors, in this case configuration is possible
+  // Flag to disable not chosen vendors, in this case configuration is possible
   // otherwise, lower their priority and continue to check ability to transfer
   Standard_Boolean aToDisable = Standard_True;
   aSession->ChangePriority(aFormat, aVendors, aToDisable);
@@ -351,8 +351,8 @@ It is possible to read and write CAD files directly from a special provider.
 
 ~~~~{.cpp}
 // Creating or getting node
-Handle(STEPCAFControl_ConfigurationNode) aNode = new STEPCAFControl_ConfigurationNode();
-// Creationg an one-time provider
+Handle(DESTEP_ConfigurationNode) aNode = new DESTEP_ConfigurationNode();
+// Creating an one-time provider
 Handle(DE_Provider) aProvider = aNode->BuildProvider();
 // Setting configuration with all parameters
 aProvider->SetNode(aNode);

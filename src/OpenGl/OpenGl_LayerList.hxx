@@ -102,7 +102,8 @@ public:
   //! Render this element
   Standard_EXPORT void Render (const Handle(OpenGl_Workspace)& theWorkspace,
                                const Standard_Boolean          theToDrawImmediate,
-                               const OpenGl_LayerFilter        theLayersToProcess,
+                               const OpenGl_LayerFilter        theFilterMode,
+                               const Graphic3d_ZLayerId        theLayersToProcess,
                                OpenGl_FrameBuffer*             theReadDrawFbo,
                                OpenGl_FrameBuffer*             theOitAccumFbo) const;
 
@@ -120,10 +121,10 @@ public:
   Standard_Size ModificationStateOfRaytracable() const { return myModifStateOfRaytraceable; }
 
   //! Returns BVH tree builder for frustum culling.
-  const Handle(Select3D_BVHBuilder3d)& FrustumCullingBVHBuilder() const { return myBVHBuilder; }
+  const Handle(BVH_Builder3d)& FrustumCullingBVHBuilder() const { return myBVHBuilder; }
 
   //! Assigns BVH tree builder for frustum culling.
-  Standard_EXPORT void SetFrustumCullingBVHBuilder (const Handle(Select3D_BVHBuilder3d)& theBuilder);
+  Standard_EXPORT void SetFrustumCullingBVHBuilder (const Handle(BVH_Builder3d)& theBuilder);
 
   //! Dumps the content of me into the stream
   Standard_EXPORT void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
@@ -186,11 +187,11 @@ protected:
   //! Additional accumulation framebuffer is used for blended order-independent
   //! transparency algorithm. It should support floating-point color components
   //! and share depth with main reading/drawing framebuffer.
-  //! @param theWorkspace [in] the currently used workspace for rendering.
+  //! @param[in] theWorkspace  the currently used workspace for rendering.
   //! @param theLayerIter [in/out] the current iterator of transparent layers to process.
-  //! @param theGlobalSettings [in] the set of global settings used for rendering.
-  //! @param theReadDrawFbo [in] the framebuffer for reading depth and writing final color.
-  //! @param theOitAccumFbo [in] the framebuffer for accumulating color and coverage for OIT process.
+  //! @param[in] theGlobalSettings  the set of global settings used for rendering.
+  //! @param[in] theReadDrawFbo  the framebuffer for reading depth and writing final color.
+  //! @param[in] theOitAccumFbo  the framebuffer for accumulating color and coverage for OIT process.
   Standard_EXPORT void renderTransparent (const Handle(OpenGl_Workspace)&   theWorkspace,
                                           OpenGl_LayerStack::iterator&      theLayerIter,
                                           const OpenGl_GlobalLayerSettings& theGlobalSettings,
@@ -206,10 +207,12 @@ protected:
 
   NCollection_List<Handle(Graphic3d_Layer)> myLayers;
   NCollection_DataMap<Graphic3d_ZLayerId, Handle(Graphic3d_Layer)> myLayerIds;
-  Handle(Select3D_BVHBuilder3d) myBVHBuilder;      //!< BVH tree builder for frustum culling
+  Handle(BVH_Builder3d) myBVHBuilder;      //!< BVH tree builder for frustum culling
 
   Standard_Integer        myNbStructures;
+// clang-format off
   Standard_Integer        myImmediateNbStructures; //!< number of structures within immediate layers
+// clang-format on
 
   mutable Standard_Size   myModifStateOfRaytraceable;
 

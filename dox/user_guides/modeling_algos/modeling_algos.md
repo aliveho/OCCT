@@ -137,7 +137,7 @@ This class is used to  interpolate a BSplineCurve passing through an array of po
 This class may be  instantiated as follows: 
 ~~~~{.cpp}
 Geom2dAPI_Interpolate 
-(const  Handle_TColgp_HArray1OfPnt2d& Points, 
+(const  Handle(TColgp_HArray1OfPnt2d)& Points, 
 const  Standard_Boolean PeriodicFlag, 
 const Standard_Real  Tolerance); 
 
@@ -165,7 +165,7 @@ Geom2dAPI_Interpolate(Points,
 This class may be  instantiated as follows: 
 ~~~~{.cpp}
 GeomAPI_Interpolate 
-(const  Handle_TColgp_HArray1OfPnt& Points, 
+(const  Handle(TColgp_HArray1OfPnt)& Points, 
 const  Standard_Boolean PeriodicFlag, 
 const Standard_Real  Tolerance); 
 
@@ -2329,7 +2329,7 @@ else {
 
 @subsubsection occt_modalg_7_4 Pipe  Constructor
 
-*BRepOffsetAPI_MakePipe* class allows creating a pipe from a Spine,  which is a Wire and a Profile which is a Shape. This implementation is limited  to spines with smooth transitions, sharp transitions are precessed by  *BRepOffsetAPI_MakePipeShell*. To be more precise the continuity must be G1,  which means that the tangent must have the same direction, though not necessarily the same magnitude, at neighboring edges. 
+*BRepOffsetAPI_MakePipe* class allows creating a pipe from a Spine,  which is a Wire and a Profile which is a Shape. This implementation is limited  to spines with smooth transitions, sharp transitions are processed by  *BRepOffsetAPI_MakePipeShell*. To be more precise the continuity must be G1,  which means that the tangent must have the same direction, though not necessarily the same magnitude, at neighboring edges. 
 
 The angle between the spine and the profile is preserved throughout the pipe. 
 

@@ -459,7 +459,7 @@ void AppDef_Variational::Approximate()
 
   //---------------------------------------------------------------------
 
-  Standard_Integer jp2d,jp3d,index,ipole, 
+  Standard_Integer jp2d,jp3d,ipole, 
     NbElem = TheCurve->NbElements();
 
   TColgp_Array1OfPnt TabP3d(1, Max(1,myNbP3d));
@@ -468,9 +468,6 @@ void AppDef_Variational::Approximate()
 
   gp_Pnt2d P2d;
   gp_Pnt P3d;
-
-  index=0;
-
   {
     Handle(TColStd_HArray2OfReal) PolynomialIntervalsPtr =
       new TColStd_HArray2OfReal(1,NbElem,1,2) ;
@@ -549,7 +546,7 @@ void AppDef_Variational::Approximate()
 
       for (ipole=PolesPtr->LowerRow();ipole<=PolesPtr->UpperRow();ipole++)
       {
-        index=PolesPtr->LowerCol();
+        Standard_Integer index = PolesPtr->LowerCol();
         /*	    if(myNbP2d !=0 ) 
         {
         for (jp2d=1;jp2d<=myNbP2d;jp2d++)
@@ -1150,7 +1147,7 @@ void AppDef_Variational::TheMotor(
 
   Handle(TColStd_HArray1OfReal) CurrentTi, NewTi, OldTi;  
   Handle(TColStd_HArray2OfInteger) Dependence;
-  Standard_Boolean lestim, lconst, ToOptim, iscut;
+  Standard_Boolean lestim, ToOptim, iscut;
   Standard_Boolean isnear = Standard_False, again = Standard_True; 
   Standard_Integer NbEst, ICDANA, NumPnt, Iter;
   Standard_Integer MaxNbEst =5; 
@@ -1198,7 +1195,7 @@ void AppDef_Variational::TheMotor(
 
     // (1) Loop  Optimization / Estimation
     lestim = Standard_True;
-    lconst = Standard_True;
+    Standard_Boolean lconst = Standard_True;
     NbEst = 0;
 
     J->SetCurve(CCurrent);
@@ -1669,7 +1666,9 @@ void AppDef_Variational::Project(const Handle(FEmTool_Curve)& C,
     AveErr += Dist;
   }
 
+// clang-format off
   NumPoints = NumPoints + myFirstPoint - 1;// Setting NumPoints to interval [myFirstPoint, myLastPoint]
+// clang-format on
 
 }
 
@@ -2004,7 +2003,7 @@ void AppDef_Variational::InitSmoothCriterion()
 void AppDef_Variational::InitParameters(Standard_Real& Length)
 {
 
-  const Standard_Real Eps1 = Precision::Confusion() * .01;
+  constexpr Standard_Real Eps1 = Precision::Confusion() * .01;
 
   Standard_Real aux, dist;
   Standard_Integer i, i0, i1 = 0, ipoint;
@@ -2052,7 +2051,7 @@ void AppDef_Variational::InitCriterionEstimations(const Standard_Real Length,
 {
   E1 = Length * Length;
 
-  const Standard_Real Eps1 = Precision::Confusion() * .01;
+  constexpr Standard_Real Eps1 = Precision::Confusion() * .01;
 
   math_Vector VTang1(1, myDimension), VTang2(1, myDimension), VTang3(1, myDimension),
     VScnd1(1, myDimension), VScnd2(1, myDimension), VScnd3(1, myDimension);
@@ -2180,7 +2179,7 @@ void AppDef_Variational::EstTangent(const Standard_Integer ipnt,
 
 {
   Standard_Integer i ;
-  const Standard_Real Eps1 = Precision::Confusion() * .01;
+  constexpr Standard_Real Eps1 = Precision::Confusion() * .01;
   const Standard_Real EpsNorm = 1.e-9;
 
   Standard_Real Wpnt = 1.;

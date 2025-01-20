@@ -79,7 +79,8 @@ public:
 static inline Standard_Integer getNearestPow2( Standard_Integer theValue )
 {
   // Precaution against overflow
-  Standard_Integer aHalfMax = IntegerLast() >> 1, aRes = 1;
+  constexpr Standard_Integer aHalfMax = IntegerLast() >> 1;
+  Standard_Integer aRes = 1;
   if ( theValue > aHalfMax ) theValue = aHalfMax;
   while ( aRes < theValue ) aRes <<= 1;
   return aRes;
@@ -300,7 +301,9 @@ void MeshVS_NodalColorPrsBuilder::Build ( const Handle(Prs3d_Presentation)& Prs,
 
       if (aType == MeshVS_ET_Face)
       {
+// clang-format off
         for (Standard_Integer aNodeIdx = 0; aNodeIdx < NbNodes - 2; ++aNodeIdx) // triangulate polygon
+// clang-format on
         {
           for (Standard_Integer aSubIdx = 0; aSubIdx < 3; ++aSubIdx) // generate sub-triangle
           {
@@ -526,7 +529,9 @@ void MeshVS_NodalColorPrsBuilder::AddVolumePrs (const Handle(MeshVS_HArray1OfSeq
         }
       }
 
+// clang-format off
       for (Standard_Integer aNodeIdx = 0; aNodeIdx < aFaceNodes.Length() - 2; ++aNodeIdx) // triangulate polygon
+// clang-format on
       {
         for (Standard_Integer aSubIdx = 0; aSubIdx < 3; ++aSubIdx) // generate sub-triangle
         {

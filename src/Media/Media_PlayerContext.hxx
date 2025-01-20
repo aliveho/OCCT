@@ -36,16 +36,16 @@ class Media_PlayerContext : public Standard_Transient
 public:
 
   //! Dump first video frame.
-  //! @param theSrcVideo [in] path to the video
-  //! @param theMediaInfo [out] video description
+  //! @param[in] theSrcVideo  path to the video
+  //! @param[out] theMediaInfo  video description
   Standard_EXPORT static Handle(Media_Frame) DumpFirstFrame (const TCollection_AsciiString& theSrcVideo,
                                                              TCollection_AsciiString& theMediaInfo);
 
   //! Dump first video frame.
-  //! @param theSrcVideo [in] path to the video
-  //! @param theOutImage [in] path to make a screenshot
-  //! @param theMediaInfo [out] video description
-  //! @param theMaxSize [in] when positive - downscales image to specified size
+  //! @param[in] theSrcVideo  path to the video
+  //! @param[in] theOutImage  path to make a screenshot
+  //! @param[out] theMediaInfo  video description
+  //! @param[in] theMaxSize  when positive - downscales image to specified size
   Standard_EXPORT static bool DumpFirstFrame (const TCollection_AsciiString& theSrcVideo,
                                               const TCollection_AsciiString& theOutImage,
                                               TCollection_AsciiString& theMediaInfo,
@@ -135,6 +135,7 @@ private:
   Media_IFrameQueue*          myFrameQueue;     //!< frame queue
   OSD_Thread                  myThread;         //!< working thread
   Standard_Mutex              myMutex;          //!< mutex for events
+// clang-format off
   Standard_Condition          myWakeEvent;      //!< event to wake up working thread and proceed new playback event
   Standard_Condition          myNextEvent;      //!< event to check if working thread processed next file event (e.g. released file handles of previous input)
   Media_Timer                 myTimer;          //!< playback timer       
@@ -144,6 +145,7 @@ private:
   Handle(Media_Frame)         myFrameTmp;       //!< temporary object holding decoded frame
   Handle(Media_Scaler)        myScaler;         //!< pixel format conversion tool
   bool                        myToForceRgb;     //!< flag indicating if queue requires RGB pixel format or can handle also YUV pixel format
+// clang-format on
 
   volatile bool               myToShutDown;     //!< flag to terminate working thread
   TCollection_AsciiString     myInputPath;      //!< new input to open

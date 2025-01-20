@@ -1026,7 +1026,7 @@ void  BSplCLib::BoorScheme(const Standard_Real U,
   //  They are alternatively written if the odd and even positions.
   //
   //  The successives contents of the array are
-  //   ***** means unitialised, l = Degree + Length
+  //   ***** means uninitialised, l = Degree + Length
   //
   //  P(0,0) ****** P(0,1) ...... P(0,l-1) ******** P(0,l)
   //  P(0,0) P(1,0) P(0,1) ...... P(0,l-1) P(1,l-1) P(0,l)
@@ -2913,8 +2913,6 @@ BSplCLib::SolveBandedSystem(const math_Matrix&  Matrix,
     if ( Abs(divizor) > Toler )
       Inverse = 1.0e0 / divizor ;
     else {
-      Inverse = 1.0e0;
-//      std::cout << "  BSplCLib::SolveBandedSystem() : zero determinant " << std::endl;
       ReturnCode = 1;
       goto FINISH;
     }

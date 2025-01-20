@@ -38,16 +38,16 @@ public:
 public:
 
   //! Constructor from existing pixmap.
-  //! @param theImage [in] source image
-  //! @param theImageAlpha [in] colorless image
+  //! @param[in] theImage  source image
+  //! @param[in] theImageAlpha  colorless image
   Standard_EXPORT Graphic3d_MarkerImage (const Handle(Image_PixMap)& theImage,
                                          const Handle(Image_PixMap)& theImageAlpha = Handle(Image_PixMap)());
 
   //! Creates marker image from array of bytes
   //! (method for compatibility with old markers definition).
-  //! @param theBitMap [in] source bitmap stored as array of bytes
-  //! @param theWidth  [in] number of bits in a row
-  //! @param theHeight [in] number of bits in a column
+  //! @param[in] theBitMap  source bitmap stored as array of bytes
+  //! @param[in] theWidth   number of bits in a row
+  //! @param[in] theHeight  number of bits in a column
   Standard_EXPORT Graphic3d_MarkerImage (const Handle(TColStd_HArray1OfByte)& theBitMap,
                                          const Standard_Integer theWidth,
                                          const Standard_Integer theHeight);
@@ -81,7 +81,7 @@ public:
   //! @param theAlphaValue pixels in the image that have alpha value greater than
   //!                      or equal to this parameter will be stored in bitmap as "1",
   //!                      others will be stored as "0"
-  //! @param theIsTopDown [in] flag indicating expected rows order in returned bitmap, which is bottom-up by default
+  //! @param[in] theIsTopDown  flag indicating expected rows order in returned bitmap, which is bottom-up by default
   Standard_EXPORT Handle(TColStd_HArray1OfByte) GetBitMapArray (const Standard_Real theAlphaValue = 0.5,
                                                                 const Standard_Boolean theIsTopDown = false) const;
 
@@ -97,10 +97,12 @@ private:
 
   TCollection_AsciiString       myImageId;      //!< resource identifier
   TCollection_AsciiString       myImageAlphaId; //!< resource identifier
+// clang-format off
   Handle(TColStd_HArray1OfByte) myBitMap;       //!< bytes array with bitmap definition (for compatibility with old code)
   Handle(Image_PixMap)          myImage;        //!< full-color  marker definition
   Handle(Image_PixMap)          myImageAlpha;   //!< alpha-color marker definition (for dynamic hi-lighting)
   Standard_Integer              myMargin;       //!< extra margin from boundaries for bitmap -> point sprite conversion, 1 px by default
+// clang-format on
   Standard_Integer              myWidth;        //!< marker width
   Standard_Integer              myHeight;       //!< marker height
 
